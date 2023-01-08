@@ -285,7 +285,7 @@ def nbre():
     m = st.number_input("largeur de la simulation", min_value=1, max_value=100, value=30)
     return n,m
 n,m = nbre()
-f' Simulation de la chaine de Markov cachée pour deux mots clés de {n} parcours de longueur {n}'
+f' Simulation de la chaine de Markov cachée pour deux mots clés de {m} parcours de longueur {n}'
 M = Markov_caché(n = n,A = A,B = D,m =m)
 Mat = M.Mul_HMM()
 Mat
@@ -382,6 +382,7 @@ V = mat["Mots clefs_0"].values
 
 Ba = Baum_welch(V =V,a = A,b = D, initial=initial_distribution)
 est = Ba.baum_welch()
+" Les estimateurs de Baum Welch de A et B sont :" 
 "L'estimateur de la matrice A est : ",est["a"]
 "L'estimateur de la matrice B est : ",est["b"]
 
@@ -430,6 +431,7 @@ def viterbi(V, a, b, initial_distribution):
 
 Verdi = viterbi(V, est["a"],est["b"], initial_distribution)
 '### Générateur des états cachés en utilisant Viterbi'
+"Cette simulation des états avec Viterbi utilisée comme paramètre les estimateurs obtinus par Baum Welch et les résultat est le suivant "
 st.dataframe(Verdi)
 '''# 3. Simulation des communauté web
 Supposons qu'un ensemble n = 90 pages web soit partagé en 3 groupes:
