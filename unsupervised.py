@@ -433,6 +433,15 @@ Verdi = viterbi(V, est["a"],est["b"], initial_distribution)
 '### Générateur des états cachés en utilisant Viterbi'
 "Cette simulation des états avec Viterbi utilisée comme paramètre les estimateurs obtinus par Baum Welch et les résultat est le suivant "
 st.dataframe(Verdi)
+
+
+"""L'algorithme de Viterbi (VA) est une solution optimale au sens du maximum de vraisemblance pour l’estimation d’une séquence d’états 
+d’un processus de Markov à temps discrets et nombres d’états finis observés dans un bruit sans mémoire. Nous pouvons donc dire que le 
+procèssus est le chemin optimal pour un suffeur au sens du maimum de vraisemble"""
+
+
+
+
 '''# 3. Simulation des communauté web
 Supposons qu'un ensemble n = 90 pages web soit partagé en 3 groupes:
 
