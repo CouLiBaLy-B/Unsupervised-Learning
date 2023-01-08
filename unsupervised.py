@@ -432,7 +432,7 @@ def viterbi(V, a, b, initial_distribution):
 
 Verdi = viterbi(V, est["a"],est["b"], initial_distribution)
 '### Générateur des états cachés en utilisant Viterbi'
-"Cette simulation des états avec Viterbi utilisée comme paramètre les estimateurs obtinus par Baum Welch et les résultat est le suivant "
+"Cette simulation des états avec Viterbi utilisée comme paramètre A et D et le résultat est le suivant "
 st.dataframe(Verdi)
 
 
