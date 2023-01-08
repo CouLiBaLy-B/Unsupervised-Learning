@@ -42,7 +42,7 @@ sur les choix des différents paramètres fixés dans le sujet.
 
 '# 1. Algorithme Page Rank'
 """
-### Simulation d'un graphe orienté de N sommets et de probabilité p. Pour cette simulation, nous allons utiliser la librairie $networkx$ de python
+Simulation d'un graphe orienté de N sommets et de probabilité p. Pour cette simulation, nous allons utiliser la librairie $networkx$ de python
 que est l'quivalent du package R $igraph$.
 """
 
@@ -56,6 +56,7 @@ g = nxf(d[0], d[1], directed = True, seed =20222023)
 pos = nx.spring_layout(g)
 gp, ax = plt.subplots()
 ax = nx.draw(g,pos = pos, ax =ax ,node_size=800,node_color='blue', edge_color='red',with_labels=True)
+"Graphe simulé"
 gp
 
 """ Une fois le graghe généré, nous pouvons facilement avoir accès à la matrice d'adjacence à l'aide de $adjacency_matrix$ de $networkx$ donc a la matrice de transition 
