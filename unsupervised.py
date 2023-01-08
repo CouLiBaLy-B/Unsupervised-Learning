@@ -452,7 +452,7 @@ r'''
 
 • $∀k , P(z_i = k) = \pi_k = 1/3$
 
-Avec $\alpha = 0.15$ et $\beta = 0.05$.
+Avec $\alpha $ et $\beta$ ajustables.
 
 '''
 class SBM:
