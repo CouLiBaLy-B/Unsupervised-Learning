@@ -298,12 +298,14 @@ class Baum_welch:
         - V : observations (visible)
         - a : Matrice de transition
         - b : matrice d'emision
+        - n_iter : nombre d'iteration maximal
         - initial : probabilité initiale'''
-    def __init__(self, V, a,b,initial):
+    def __init__(self, V, a,b,initial, n_iter):
         self.V = V
         self.a = a
         self.b = b
         self.initial = initial
+        self.n_iter = n_iter
 
     def forward(self):
         alpha = np.zeros((self.V.shape[0], self.a.shape[0]))
@@ -324,8 +326,7 @@ class Baum_welch:
     def baum_welch(self):
         M = self.a.shape[0]
         T = len(self.V)
-        n_iter = len(self.V)
-        for n in range(n_iter):
+        for n in range(self.n_iter):
             alpha = Baum_welch.forward(self)
             beta = Baum_welch.backward(self)
             xi = np.zeros((M, M, T - 1))
