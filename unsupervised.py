@@ -381,7 +381,7 @@ if st.checkbox("Voulez-vous voir la matrice recodée ?", value= False):
 initial_distribution = np.ones(A.shape[0])/A.shape[0]
 V = mat["Mots clefs_0"].values
 
-Ba = Baum_welch(V =V,a = A,b = D, initial=initial_distribution)
+Ba = Baum_welch(V =V,a = A,b = D, initial=initial_distribution, n_iter = 100)
 est = Ba.baum_welch()
 " Les estimateurs de Baum Welch de A et B sont :" 
 "L'estimateur de la matrice A est : ",est["a"]
