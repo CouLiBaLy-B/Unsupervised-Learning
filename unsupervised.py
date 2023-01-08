@@ -550,22 +550,34 @@ if st.checkbox("Voulez vous vérifier le caractère stochastique de A1 et A2 ?",
         C = A2.sum(axis =1)
         C
 
+def n():
+    n = st.number_input("La taille la simulation :", min_value=100, max_value=10000, value=500)
+    return n
 
-def MSimulation(A, words, n=500):
-    path_words = []
-    path_keys = []
-    nodes = np.arange(90)
-    # The first node
-    current_node = np.random.choice(nodes)
-    path_words.append(words[current_node])
-    path_keys.append(key_list[val_list.index(words[current_node])])
-    # Following path
-    for i in range(n - 1):
-        current_node = np.random.choice(nodes, p =A[current_node, :])
-        path_words.append(words[current_node[0]])
-        path_keys.append(key_list[val_list.index(words[current_node])])
-    return np.array(path_words), np.array(path_keys)
 
+n = n()
+f"Simulation d'un parcours de {n} avec les deux matrices."
+
+def MSimulation(A, keyword, n=n):
+    m = A.shape[0]
+    mot = np.random.choice(range(m))
+    mots = np.zeros(n)
+    mots[0] = int(mot)
+    for i in range(1, n):
+        mot = np.random.choice(range(m), p =A[mot, :])
+        mots[i] = int(mot)
+    return mots
+
+aa = MSimulation(A1, keyword, n=n)
+AA = MSimulation(A2, keyword, n=n)
+
+col1, col2 = st.columns(2)
+with col1:
+    f"{n} simulation avec la matrice A1"
+    aa
+with col2:
+    f"{n} simulation avec la matrice A2"
+    AA
 
 
 
