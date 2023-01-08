@@ -465,29 +465,9 @@ r'''
 Avec $\alpha $ et $\beta$ ajustables.
 
 '''
-class SBM:
-    def __init__(self, n, alpha, beta):
-        self.n = n
-        self.alpha = alpha
-        self.beta = beta
 
-    def indicatrice(l,k):
-        return 1 if l == k else 0
 
-    def simulation_sbm(self):
-        matrice = np.zeros((3,3), dtype=int)
-        Z1 = [np.random.choice(["S","C","B"])]
-        Z2 = [np.random.choice(["S","C","B"])]
-        X = [np.random.binomial(1,self.alpha*SBM.indicatrice(Z1,Z2) + self.beta*(1+ SBM.indicatrice(Z1,Z2)))]
-        for i in range(n):
-            Z1.append(np.random.choice(["S","C","B"]))
-            Z2.append(np.random.choice(["S", "C", "B"]))
-            X.append(np.random.binomial(1,self.alpha* SBM.indicatrice(Z1,Z2) + self.beta*(1+ SBM.indicatrice(Z1,Z2))))
-        for i in range(len(X)):
-            if X[i] == 1:
-                matrice[["S","C","B"].index(Z1[i]), ["S","C","B"].index(Z2[i])] = 1
-        return {"Matrice" : matrice, "Z1": Z1, "Z2":Z2}
-
+"# Simulation"
 
 def parametres():
     n = st.number_input("La taille n de la simulation :", value= 90, min_value=10, max_value=1000)
@@ -497,44 +477,92 @@ def parametres():
 
 n, alpha,beta = parametres()
 
-# Simulation
-Sbm = SBM(n = n, alpha = alpha, beta = beta)
+def sbm_simulation(n = n, pi = [1/3, 1/3, 1/3], alpha = alpha, beta = beta):
+  X = np.zeros((n,n))
+  mm = np.random.multinomial(n, pvals = [1/3, 1/3, 1/3])
+  Z = np.concatenate((np.concatenate((np.ones(mm[0]), 2*np.ones(mm[1]))), 3*np.ones(mm[2])))
+  for i in range(n):
+    for j in range(n):
+      if Z[i] == Z[j]:
+          p = alpha
+      else:
+          p = beta
+      if (np.random.binomial(1, p) & (i != j)):
+        X[i,j] = 1
+  return Z, X
 
-Simu = Sbm.simulation_sbm()
-"La matrice d'adjacence X"
-X = Simu["Matrice"]
-X
-if st.checkbox(r"""Voulez-vous voir Zi ?""", value=False):
-    col1 , col2 = st.columns(2)
-    with col1 :
-        Simu["Z1"]
-    with col2 :
-        Simu["Z2"]
+Z, X = sbm_simulation(n = n, pi = [1/3, 1/3, 1/3], alpha = alpha, beta = beta)
+
+col1, col2 = st.columns(2)
+with col1:
+    "Les domaines"
+    Z
+with col2:
+    "Matrice d'adjacence X"
+    X
+
+D = sbm_d
+
+' Génération des mots visibles connaissant les mots caché'
+
+def simulation_sbm(keyword, B, Z):
+    Mots = []
+    M = B.shape[1]
+    for i in Z:
+        Mots.append(keyword[np.random.choice(range(M), p = B[int(i- 1),])])
+    return Mots
+mots = simulation_sbm(keyword, sbm_d, Z)
 
 
+col1, col2 = st.columns(2)
+with col1:
+    "Domaines (mots cachés)"
+    Z
+with col2:
+    "Mots visibles"
+    st.dataframe(mots)
 
-
-
+# Calcul de la matrice A
 def eps():
     ep = st.number_input("Epsillon  = 1 / " , min_value=100, max_value=10000, value=1000)
     return ep
 ep = 1/eps()
 
-# Calcul de la matrice A
+r"$$ A^{1}_{ij} = \frac{X_{ij} + ϵ}{\sum_j X_{ij} + n ϵ} $$"
 
-A1 = np.zeros(X.shape)
-for i in range(X.shape[0]):
-    for j in range(X.shape[1]):
-        A1[i,j] = (X[i,j]+ ep)/(np.sum(X[i,])+ n*ep)
-"La matrice $A^1$"
-A1
+A1 = (X + ep)/(np.sum(X, axis = 1) + n * ep)
+if st.checkbox(r"Voulez vous afficher la matrice $A^1$ ?", value=False):
+    r"La Matrice $A^1$", A1
 
-"La matrice $A^2$"
-A2 = np.ones(X.shape)/np.sqrt(n)
+r"$$ A^{2}_{ij} = \frac{1}{n}$$"
+A2 = np.ones(X.shape) / n
+if st.checkbox(r"Voulez vous afficher la matrice $A^2$ ?", value=False):
+    r"La Matrice $A^2$", A2
+if st.checkbox("Voulez vous vérifier le caractère stochastique de A1 et A2 ?", value=False):
+    col1, col2 = st.columns(2)
+    with col1:
+        c = A1.sum(axis =1)
+        c
+    with col2:
+        C = A2.sum(axis =1)
+        C
 
-A2
 
-# Simulation
+def MSimulation(A, words, n=500):
+    path_words = []
+    path_keys = []
+    nodes = np.arange(90)
+    # The first node
+    current_node = np.random.choice(nodes)
+    path_words.append(words[current_node])
+    path_keys.append(key_list[val_list.index(words[current_node])])
+    # Following path
+    for i in range(n - 1):
+        current_node = np.random.choice(nodes, p =A[current_node, :])
+        path_words.append(words[current_node[0]])
+        path_keys.append(key_list[val_list.index(words[current_node])])
+    return np.array(path_words), np.array(path_keys)
+
 
 
 
