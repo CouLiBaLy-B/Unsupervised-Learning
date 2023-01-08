@@ -533,7 +533,7 @@ ep = 1/eps()
 
 r"$$ A^{1}_{ij} = \frac{X_{ij} + ϵ}{\sum_j X_{ij} + n ϵ} $$"
 
-A1 = (X + ep)/(np.sum(X, axis = 1) + n * ep)
+A1 = (X + ep)/(np.sum(X, axis = 1) + n * ep)[:,None]
 if st.checkbox(r"Voulez vous afficher la matrice $A^1$ ?", value=False):
     r"La Matrice $A^1$", A1
 
@@ -550,20 +550,21 @@ if st.checkbox("Voulez vous vérifier le caractère stochastique de A1 et A2 ?",
         C = A2.sum(axis =1)
         C
 
+
 def n():
     n = st.number_input("La taille la simulation :", min_value=100, max_value=10000, value=500)
     return n
 
 n = n()
 
-def MSimulation(A,  n=n):
+def MSimulation(A, n):
     m = A.shape[0]
     mot = np.random.choice(range(m))
     mots = np.zeros(n)
-    mots[0] = int(mot)
+    mots[0] = mot
     for i in range(1, n):
         mot = np.random.choice(range(m), p =A[mot, :])
-        mots[i] = int(mot)
+        mots[i] = mot
     return mots
 
 aa = MSimulation(A=A1,  n=n)
@@ -576,4 +577,8 @@ with col1:
 with col2:
     f"{n} simulations avec la matrice A2"
     AA
+
+
+
+
 
