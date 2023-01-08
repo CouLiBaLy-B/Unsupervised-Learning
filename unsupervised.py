@@ -229,7 +229,7 @@ for i in range(B.shape[0]):
       else :
         D[i][np.sum(range(B.shape[1]))- np.sum(range(B.shape[1]-j))+k] = B[i][j]* B[i][k]
 
-smb_d = D.copy
+sbm_d = D.copy
 'La nouvelle matrice des probabilités est : ',D
 'Vérification du caractère stochastique de la matrice', D.sum(axis = 1)
 
@@ -497,13 +497,13 @@ Z, X = sbm_simulation(n = n, pi = [1/3, 1/3, 1/3], alpha = alpha, beta = beta)
 
 col1, col2 = st.columns(2)
 with col1:
-    "Les domaines"
+    "Les domaines simulés"
     Z
 with col2:
     "Matrice d'adjacence X"
     X
 
-D = sbm_d
+
 
 ' Génération des mots visibles connaissant les mots caché'
 
