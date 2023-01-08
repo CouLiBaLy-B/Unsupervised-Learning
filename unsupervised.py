@@ -180,8 +180,11 @@ with col2:
 
 '# 2. COMMUNICATION WEB'
 '## Parcours web'
-
+""" Dans cette section, nous allons simuler un parcours web d'une personne lambda à l'aide d'une chaîne de Markov cachée (HMM) dont les paramètres sont :
+"""
+" Etats cachés "
 domaine = ["Sport","Culture","Beauté"]
+st.dataframe(domaine)
 A = np.array([0.7,0.2,0.1,0.25,0.7,0.05,0.1,0.1,0.8], dtype = float).reshape((3,3)) # Matrice de transition de la chaine de Markov
 
 Mots = ["Abdominaux", "Cosmétiques","Livres","Age","Force", "Endurance","Résilience", "Crème", "Histoire", "Mathématiques"] # Matrice de changement des états cachés
@@ -195,11 +198,15 @@ B = np.array([0.2,0,0.1,
               0,0,0.2,
               0,0.2,0,
               0,0.1,0], dtype = float).reshape((10,3)).T
-'La Matrice A'
+'La Matrice  de transition A'
 A
-'La matrice B'
+" Etats visibles "
+st.dataframe(Mots)
+"La matrice d'emission B"
 B
 '''Pour faire la simulation à double mots clés, nous allons commencer par determiner la matrice des probabilités pour deux mots
+ainsi que des couples de mots clés sans tenir compte ni de l'ordre. Ainsi dont la creation de notre matrice de probabilité sera sous condition de 
+d'independance des deu mots clés par rapport au domaine est :
 
 $$ D_{i,j} = P(X_j = W1, Y_j = W2 |Dom_i) = P(X_j = W1 |Dom_i) * P(Y_j = W2 |Dom_i)$$
 
