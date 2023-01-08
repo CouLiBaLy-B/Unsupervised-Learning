@@ -41,8 +41,10 @@ sur les choix des différents paramètres fixés dans le sujet.
 """
 
 '# 1. Algorithme Page Rank'
-r"""### Simulation d'un graphe orienté de N sommets et de probabilité p. Pour cette simulation, nous allons utiliser la librairie $networkx$ de python
-que est l'quivalent du package R $igraph$."""
+"""
+### Simulation d'un graphe orienté de N sommets et de probabilité p. Pour cette simulation, nous allons utiliser la librairie $networkx$ de python
+que est l'quivalent du package R $igraph$.
+"""
 
 def param():
     K = st.slider('Le nombre de sommet ',7,10,8)
@@ -56,6 +58,9 @@ gp, ax = plt.subplots()
 ax = nx.draw(g,pos = pos, ax =ax ,node_size=800,node_color='blue', edge_color='red',with_labels=True)
 gp
 
+""" Une fois le graghe généré, nous pouvons facilement avoir accès à la matrice d'adjacence à l'aide de $adjacency_matrix$ de $networkx$ donc a la matrice de transition 
+en ajoutant quelques transformations à celle-ci.
+"""
 '### La matrice de transition pour un $ϵ$ donné'
 def eps():
     eps = st.slider('La probabilté  ϵ', 0.0, 0.50, 0.05)
@@ -76,7 +81,9 @@ OtMat = Adj.apply(lambda x : (x-ep)/sum(x)  , axis=1 )
 OtMat[OtMat < 0] = 0
 Matrice = MatriceA + OtMat
 MatriceA = np.array(Matrice)
+
 # Matrice de transition
+
 Matrice
 
 '### La probabilité stationnaire'
@@ -89,6 +96,7 @@ def i():
     return i
 i = i()
 stat1 = np.linalg.matrix_power(MatriceA, i)[0]
+
 stat1
 '''### Simulation d'une chaine de Markov 
 
@@ -168,7 +176,7 @@ with col2:
     "Méthode 2"
     stat2[:-1]
 
-
+"""On aisément voir que la différence entre les estimations est très petite
 
 '# 2. COMMUNICATION WEB'
 '## Parcours web'
