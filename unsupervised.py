@@ -81,7 +81,7 @@ stat1
 
 Pour mettre dans un exemple concret, nous allons utiliser les reseaux sociaux les plus connus à savoir :'''
 l = ["Facebook","Whatsapp","Instagram","Twitter","Teams","Discord","LinkedIn","Snap","Bloomberg","slack","Github"]
-l
+st.dataframe(l)
 
 stat1 = pd.Series(stat1, index=l[:d[0]])
 
@@ -178,8 +178,10 @@ B = np.array([0.2,0,0.1,
 A
 'La matrice B'
 B
-'''Pour faire la simulation a double mots clés, nous allons commencer par determiner la matrice des probabilités pour deux mots
-$D_{i,j} = P(X_j = W1, Y_j = W2 |Dom_i) = P(X_j = W1 |Dom_i) * P(Y_j = W2 |Dom_i)$
+'''Pour faire la simulation à double mots clés, nous allons commencer par determiner la matrice des probabilités pour deux mots
+
+$$ D_{i,j} = P(X_j = W1, Y_j = W2 |Dom_i) = P(X_j = W1 |Dom_i) * P(Y_j = W2 |Dom_i)$$
+
 qui provient de l'independance des deux mots clés '''
 
 keyword = []
@@ -187,7 +189,7 @@ for i in Mots :
   for j in Mots :
     if (i,j) not in keyword and (j,i) not in keyword:
         keyword.append((i,j))
-keyword
+st.dataframe(keyword)
 
 somme = np.sum(range(len(Mots)+1))
 D = np.zeros((A.shape[0], somme))
