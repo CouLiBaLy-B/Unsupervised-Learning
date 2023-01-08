@@ -409,6 +409,9 @@ Supposons qu'un ensemble n = 90 pages web soit partagé en 3 groupes:
 • les pages traitant de culture (z = C)
 
 • les pages traitant de soins beauté (z = B)
+
+selon le processus suisvant : 
+
 '''
 
 r'''
