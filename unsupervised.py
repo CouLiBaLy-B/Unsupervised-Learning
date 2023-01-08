@@ -176,7 +176,7 @@ with col2:
     "Méthode 2"
     stat2[:-1]
 
-"""On aisément voir que la différence entre les estimations est très petite
+"""On aisément voir que la différence entre les estimations est très petite """
 
 '# 2. COMMUNICATION WEB'
 '## Parcours web'
