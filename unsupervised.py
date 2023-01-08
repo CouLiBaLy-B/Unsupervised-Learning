@@ -229,7 +229,8 @@ for i in range(B.shape[0]):
       else :
         D[i][np.sum(range(B.shape[1]))- np.sum(range(B.shape[1]-j))+k] = B[i][j]* B[i][k]
 
-sbm_d = D.copy
+sbm_d = D.copy()
+
 'La nouvelle matrice des probabilités est : ',D
 'Vérification du caractère stochastique de la matrice', D.sum(axis = 1)
 
