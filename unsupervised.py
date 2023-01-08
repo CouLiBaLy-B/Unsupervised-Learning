@@ -554,11 +554,9 @@ def n():
     n = st.number_input("La taille la simulation :", min_value=100, max_value=10000, value=500)
     return n
 
-
 n = n()
-f"Simulation d'un parcours de {n} avec les deux matrices."
 
-def MSimulation(A, keyword, n=n):
+def MSimulation(A,  n=n):
     m = A.shape[0]
     mot = np.random.choice(range(m))
     mots = np.zeros(n)
@@ -568,18 +566,14 @@ def MSimulation(A, keyword, n=n):
         mots[i] = int(mot)
     return mots
 
-aa = MSimulation(A1, keyword, n=n)
-AA = MSimulation(A2, keyword, n=n)
+aa = MSimulation(A=A1,  n=n)
+AA = MSimulation(A= A2,  n=n)
 
 col1, col2 = st.columns(2)
 with col1:
-    f"{n} simulation avec la matrice A1"
+    f"{n} simulations avec la matrice A1"
     aa
 with col2:
-    f"{n} simulation avec la matrice A2"
+    f"{n} simulations avec la matrice A2"
     AA
-
-
-
-
 
