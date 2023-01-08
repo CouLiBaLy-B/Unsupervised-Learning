@@ -41,8 +41,8 @@ sur les choix des différents paramètres fixés dans le sujet.
 """
 
 '# 1. Algorithme Page Rank'
-'''### Simulation d'un graphe orienté de N sommets et de probabilité p. Pour cette simulation, nous allons utiliser la librairie $_networkx_$ de python
-que est l'quivalent du package R igraph.'''
+r"""### Simulation d'un graphe orienté de N sommets et de probabilité p. Pour cette simulation, nous allons utiliser la librairie $_networkx_$ de python
+que est l'quivalent du package R igraph."""
 
 def param():
     K = st.slider('Le nombre de sommet ',7,10,8)
