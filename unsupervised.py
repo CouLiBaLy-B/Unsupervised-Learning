@@ -154,9 +154,8 @@ if st.checkbox('Matrice des sommes cumulées', value=False):
     "Probabilité stationnaire"
     stat2
 
-"""la chaîne de Markov est irréductible, récurrente positive et apériodique, alors 
-$P^{k}$ converge vers une matrice dont chaque ligne est l'unique distribution stationnaire 
-π.
+"""
+Pour un grand nombre de simulation, le théorème d'ergodicité (loi des grands nombres des chaines de Markov) nous assure la converge vers la probabilité de chaque page.
 """
 fig, ax = plt.subplots()
 fig = px.line(df,x = "n", y = df.columns,
@@ -286,7 +285,7 @@ def nbre():
     m = st.number_input("largeur de la simulation", min_value=1, max_value=100, value=30)
     return n,m
 n,m = nbre()
-'### Simulation pour deux mots clés'
+f' Simulation de la chaine de Markov cachée pour deux mots clés de {n} parcours de longueur {n}'
 M = Markov_caché(n = n,A = A,B = D,m =m)
 Mat = M.Mul_HMM()
 Mat
