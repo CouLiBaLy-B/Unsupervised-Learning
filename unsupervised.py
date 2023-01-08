@@ -537,7 +537,8 @@ A2
 
 g = nx.stochastic_block_model(90, A1, nodelist=None, seed=None, directed=False, selfloops=False, sparse=True)
 
-g
+H = nx.quotient_graph(g, g.graph["partition"], relabel=True)
+H
 
 
 
