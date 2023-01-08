@@ -497,13 +497,13 @@ Z, X = sbm_simulation(n = n, pi = [1/3, 1/3, 1/3], alpha = alpha, beta = beta)
 
 col1, col2 = st.columns(2)
 with col1:
-    "Les domaines simulés"
+    "Les domaines"
     Z
 with col2:
     "Matrice d'adjacence X"
     X
 
-
+D = sbm_d
 
 ' Génération des mots visibles connaissant les mots caché'
 
@@ -564,6 +564,7 @@ def MSimulation(A, words, n=500):
         path_words.append(words[current_node[0]])
         path_keys.append(key_list[val_list.index(words[current_node])])
     return np.array(path_words), np.array(path_keys)
+
 
 
 
