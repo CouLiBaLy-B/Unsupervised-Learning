@@ -28,8 +28,21 @@ Cette application web a été créer avec la librairie Streamlit de python dans 
 
 """
 
+""" L'objetif de ce projet est d'appliqué les différents conceptes vue durant le cours de Unsupervised learning qui sont entre autres :
+
+- Chaine de Markov et Chaine de Markov cachée pour les simulations de communauté
+
+- Algorithme de Baum-Welch pour l'estimation et Viterbi pour une simulation
+
+- SBM (Stochastic Block Model) pour la simulation également de communauté web
+
+Pour ce qui concerne la rédaction, nous allons suivre la même trame que les questions dans le sujet du projet et apporter un peut de généralisation
+sur les choix des différents paramètres fixés dans le sujet.
+"""
+
 '# 1. Algorithme Page Rank'
-'''### Simulation d'un graphe orienté de N sommets et de probabilité p.'''
+'''### Simulation d'un graphe orienté de N sommets et de probabilité p. Pour cette simulation, nous allons utiliser la librairie $_networkx_$ de python
+que est l'quivalent du package R igraph.'''
 
 def param():
     K = st.slider('Le nombre de sommet ',7,10,8)
