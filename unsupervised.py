@@ -557,27 +557,26 @@ def n():
 
 n = n()
 
-def MSimulation(A, n):
+def MSimulation(A,Mots, n):
     m = A.shape[0]
     mot = np.random.choice(range(m))
-    mots = np.zeros(n)
-    mots[0] = mot
+    mots = []
+    mots.append(Mots[mot])
     for i in range(1, n):
         mot = np.random.choice(range(m), p =A[mot, :])
-        mots[i] = mot
+        mots.append(Mots[mot])
     return mots
 
-aa = MSimulation(A=A1,  n=n)
-AA = MSimulation(A= A2,  n=n)
+aa = MSimulation(A=A1, Mots = mots,  n=n)
+AA = MSimulation(A= A2,Mots = mots, n=n)
 
 col1, col2 = st.columns(2)
 with col1:
     f"{n} simulations avec la matrice A1"
-    aa
+    st.dataframe(aa)
 with col2:
     f"{n} simulations avec la matrice A2"
-    AA
-
+    st.dataframe(AA)
 
 
 
