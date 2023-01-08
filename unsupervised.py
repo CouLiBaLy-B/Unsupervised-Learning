@@ -340,9 +340,9 @@ for i in range(mat.shape[0]):
         mat.iloc[i,j+1] = keyword.index(Mat.iloc[i, j+1])
 
 
-'''Pour faire le calculs des estimateurs par l'algorithm de Baum welch, il faut une recodage
-des observations en entiers. Nous allons utiliser omme recodage l'indice de 
-chaque element dans sa liste correspondante. Anisi nous obtenons le tableau suivant'''
+'''Pour faire le calculs des estimateurs par l'algorithm de Baum welch, il faut un récodage
+des observations en entiers. Nous allons utiliser comme recodage l'indixe de 
+chaque élément dans sa liste correspondante. Ainsi nous obtenons le tableau suivant'''
 ####
 if st.checkbox("Voulez-vous voir la matrice recodée ?", value= False):
     mat
@@ -400,7 +400,7 @@ def viterbi(V, a, b, initial_distribution):
 
 Verdi = viterbi(V, est["a"],est["b"], initial_distribution)
 '### Générateur des états cachés en utilisant Viterbi'
-Verdi
+st.dataframe(Verdi)
 '''# 3. Simulation des communauté web
 Supposons qu'un ensemble n = 90 pages web soit partagé en 3 groupes:
 
