@@ -588,6 +588,8 @@ Le principe est le suivant :
  - A chaque batch on associe un label (0 ou 1) en fonction de la chaine (classe) de provenance
  - Que nous allons par la suite utiliser pour entrainé un modèle Convolutional Neural Network (CNN)'''
 
+c = AA[10:20]
+c
 
 def decoupage(X1,X2, l_batch):
     L = pd.DataFrame(np.zeros(((len(X)-l_batch)*2, l_batch+1)))
