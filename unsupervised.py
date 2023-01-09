@@ -5,10 +5,15 @@ import matplotlib.pyplot as plt
 import warnings
 warnings.filterwarnings("ignore")
 import plotly.express as px
-from tensorflow.keras.backend import clear_session
-from tensorflow.keras.models import Model,Sequential
-from tensorflow.keras.layers import Conv2D, MaxPooling2D
-from tensorflow.keras.layers import Input, Dense, BatchNormalization, Dropout, ReLU, Activation, Flatten
+from tensorflow.keras.datasets import imdb
+#from tensorflow.keras import utils
+
+from tensorflow.keras import backend as K
+from tensorflow.keras import Model
+from tensorflow.keras.models import Sequential
+from tensorflow.keras.preprocessing import sequence
+from tensorflow.keras.layers import Dense, Activation, Embedding, Dropout, Input, LSTM, Reshape, Lambda, RepeatVector
+
 from tensorflow.keras.optimizers import Adam
 import streamlit as st
 from PIL import Image
@@ -617,60 +622,58 @@ if st.checkbox("Vu sur X et y", value = False):
 
 '# Decoupage en train et test de nos données '
 
-x_train, x_test,y_train, y_test = train_test_split(X, y, test_size=100, random_state=42, shuffle=True,stratify=y)
 
-num_classes = 2
-y = to_categorical(y, num_classes)
-y_test = to_categorical(y_test, num_classes)
-y_train = to_categorical(y_train, num_classes)
-y_test = to_categorical(y_test, num_classes)
+x_train, x_test, y_train, y_test = train_test_split(X, y, test_size=100, random_state=42, shuffle=True, stratify=y)
 
+colab = True
+student = True
+K.clear_session()
+
+if student:
+    # --- START CODE HERE (01)
+    X_train = sequence.pad_sequences(x_train, maxlen=20)
+    X_test = sequence.pad_sequences(x_test, maxlen=20)
+    # --- END CODE HERE
 
 # Apprentissage du model
+# --- create the model
+# CODE-RNN1-2
+if student:
+    # --- START CODE HERE (02)
+    # --- Using the Sequential API
+    model = Sequential([
+        Embedding(89,32 , input_length=20),
+        Lambda(lambda x: K.mean(x, axis=1)),
+        Dense(1),
+        Activation('sigmoid')
+    ])
+    # --- END CODE HERE
 
-model_CNN = Sequential()
-
-#Block 1
-model_CNN.add(Conv2D(kernel_size= 3,input_shape=20))
-model_CNN.add(Activation('relu'))
-model_CNN.add(Conv2D(32, 3))
-model_CNN.add(Activation('relu'))
-model_CNN.add(MaxPooling2D(pool_size=2))
-model_CNN.add(Dropout(0.25))
-
-
-model_CNN.add(Flatten())
-
-#FC layer
-model_CNN.add(Dense(100))
-model_CNN.add(Activation('relu'))
-model_CNN.add(Dropout(0.5))
-model_CNN.add(Dense(num_classes))
-model_CNN.add(Activation('softmax'))
-
-"Summary"
-m = model_CNN.summary()
+    # --- START CODE HERE (03)
+    # --- Using the Functional API
+    X = Input(shape=(x_train.shape[1],))
+    Z = Embedding(89,32, input_length=20)(X)
+    Z = Lambda(lambda x: K.mean(x, axis=1))(Z)
+    Z = Dense(1)(Z)
+    Y = Activation('sigmoid')(Z)
+    model = Model(inputs=X, outputs=Y)
+m = model.summary()
 st.write(m)
 
-opt = Adam(lr=0.001)
-model_CNN.compile(loss='categorical_crossentropy',
-              optimizer=opt,
-              metrics=['accuracy'])
+# --- compile and fit the model
+model.compile(loss='binary_crossentropy', optimizer='adam', metrics=['accuracy'])
+hist =model.fit(x_train, y_train, epochs=10, batch_size=20, validation_data=(x_test, y_test))
 
-batch_size = 64
-epochs = 25
-hist = model_CNN.fit(x_train, y_train,
-              batch_size=batch_size,
-              epochs=epochs,
-              validation_data=(x_test, y_test),
-              shuffle=True)
+scores = model.evaluate(X_test, y_test, verbose=0)
+
+"Accuracy:" , (scores[1]*100)
 
 hist.history.keys()
 
 fig, a = plt.subplots()
 a.plot(hist.history['accuracy'], label='training set',marker='o', linestyle='solid',linewidth=1, markersize=6)
 a.plot(hist.history['val_accuracy'], label='validation set',marker='o', linestyle='solid',linewidth=1, markersize=6)
-plt.title("CNN-model accuracy")
+plt.title("model accuracy")
 plt.xlabel('#Epochs')
 plt.ylabel('Acuracy')
 plt.legend(bbox_to_anchor=( 1., 1.))
@@ -680,7 +683,7 @@ plt.show()
 fig, a = plt.subplots()
 a.plot(hist.history['loss'], label='training set',marker='o', linestyle='solid',linewidth=1, markersize=6)
 a.plot(hist.history['val_loss'], label='validation set',marker='o', linestyle='solid',linewidth=1, markersize=6)
-plt.title("CNN-model loss")
+plt.title("model loss")
 plt.xlabel('#Epochs')
 plt.ylabel('Total Loss')
 plt.legend(bbox_to_anchor=( 1.35, 1.))
