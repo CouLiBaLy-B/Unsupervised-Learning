@@ -690,7 +690,7 @@ plt.legend(bbox_to_anchor=( 1.35, 1.))
 fig
 plt.show()
 
-y_pred = model_MLP.predict(x_test)
+y_pred = model.predict(x_test)
 st.dataframe(y_pred)
 
 y_true = y_test.argmax(1)
