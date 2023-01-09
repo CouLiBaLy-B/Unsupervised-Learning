@@ -595,10 +595,10 @@ Le principe est le suivant :
 def decoupage(X1,X2, l_batch):
     X = []
     y = []
-    for i in range(l_batch,(len(X1)-l_batch)):
+    for i in range(l_batch,(len(X1)-l_batch),3):
         X.append(np.array(X1[(i-l_batch):i]))
         y.append(0)
-    for i in range(l_batch,(len(X1)-l_batch)):
+    for i in range(l_batch,(len(X1)-l_batch),3):
         X.append(np.array(X2[(i-l_batch):i]))
         y.append(1)
     return X,y
@@ -608,13 +608,4 @@ X,y = decoupage(aa2, AA2, 40)
 st.dataframe(X)
 st.dataframe(y)
 
-# Decoupage en train et test de nos données 
-
-x_train, x_test,y_train, y_test = train_test_split(X, y, test_size=100, random_state=42, shuffle=True,stratify=y)
-
-num_classes = 2
-y = to_categorical(y, num_classes)
-y_test = to_categorical(y_test, num_classes)
-y_train = to_categorical(y_train, num_classes)
-y_val = to_categorical(y_val, num_classes)
 
