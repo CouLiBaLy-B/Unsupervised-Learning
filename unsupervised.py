@@ -567,7 +567,7 @@ def MSimulation(A,Mots, n):
     mots.append(Mots[mot])
     for i in range(1, n):
         mot = np.random.choice(range(m), p =A[mot, :])
-        MOTS.append(mots)
+        MOTS.append(mot)
         mots.append(Mots[mot])
     return mots, MOTS
 
