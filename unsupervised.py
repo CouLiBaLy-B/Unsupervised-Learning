@@ -640,16 +640,16 @@ if student:
 if True:
     
     model = Sequential([
-        Embedding(2,32 , input_length=20),
+        Embedding(89,32 , input_length=20),
         Lambda(lambda x: K.mean(x, axis=1)),
         Dense(1),
-        Activation('sigmoid')
+        Activation('relu')
     ])
     X = Input(shape=(x_train.shape[1],))
-    Z = Embedding(2,32, input_length=20)(X)
+    Z = Embedding(89,32, input_length=20)(X)
     Z = Lambda(lambda x: K.mean(x, axis=1))(Z)
     Z = Dense(1)(Z)
-    Y = Activation('sigmoid')(Z)
+    Y = Activation('relu')(Z)
     model = Model(inputs=X, outputs=Y)
 
 st.write(model.summary())
