@@ -614,8 +614,11 @@ def decoupage(X1,X2, l_batch):
         X.append(np.array(X2[(i-l_batch):i]))
         y.append(1)
     return np.array(X), np.array(y)
-
-X,y = decoupage(aa2, AA2, 20)
+def lot():
+    l = st.number_input("La taille des lots (segment) :",min_val = 10, max_val = 200, value = 50)
+    return l
+l = lot()
+X,y = decoupage(aa2, AA2, l)
 if st.checkbox("Vu sur X et y", value = False):
     st.dataframe(X)
     st.dataframe(y)
@@ -630,21 +633,21 @@ K.clear_session()
 k = st.checkbox("Lancer l'apprentissage du modèle", value = False)
 if k:
    
-    X_train = sequence.pad_sequences(x_train, maxlen=20)
-    X_test = sequence.pad_sequences(x_test, maxlen=20)
+    X_train = sequence.pad_sequences(x_train, maxlen=l)
+    X_test = sequence.pad_sequences(x_test, maxlen=l)
   
 
 # Creation et apprentissage du model
 # CODE-RNN
 if k:
     model = Sequential([
-        Embedding(2,32 , input_length=20),
+        Embedding(2,32 , input_length=l),
         Lambda(lambda x: K.mean(x, axis=1)),
         Dense(1),
         Activation('sigmoid')
     ])
-    X = Input(shape=(x_train.shape[0],))
-    Z = Embedding(2,32, input_length=20)(X)
+    X = Input(shape=(x_train.shape[1],))
+    Z = Embedding(2,32, input_length=l)(X)
     Z = Lambda(lambda x: K.mean(x, axis=1))(Z)
     Z = Dense(1)(Z)
     Y = Activation('softmax')(Z)
