@@ -5,10 +5,16 @@ import matplotlib.pyplot as plt
 import warnings
 warnings.filterwarnings("ignore")
 import plotly.express as px
+from tensorflow.keras.backend import clear_session
+from tensorflow.keras.models import Model,Sequential
+from tensorflow.keras.layers import Conv2D, MaxPooling2D
+from tensorflow.keras.layers import Input, Dense, BatchNormalization, Dropout, ReLU, Activation, Flatten
+from tensorflow.keras.optimizers import Adam
 import streamlit as st
 from PIL import Image
 from tensorflow.keras.utils import to_categorical
 from sklearn.model_selection import train_test_split
+from sklearn.metrics import confusion_matrix,classification_report
 from networkx.generators.random_graphs import fast_gnp_random_graph as nxf
 import scipy as sc
 st.set_page_config(
@@ -619,4 +625,86 @@ y_test = to_categorical(y_test, num_classes)
 y_train = to_categorical(y_train, num_classes)
 y_test = to_categorical(y_test, num_classes)
 
+# Réduction du poids des X
+
+x_test /= 89
+x_train /= 89
+
+
+# Apprentissage du model
+
+model_CNN = Sequential()
+
+#Block 1
+model_CNN.add(Conv2D(kernel_size= (1,3), padding='valid', strides=(1, 1),
+                 input_shape=x_train.shape[1:]))
+model_CNN.add(Activation('relu'))
+model_CNN.add(Conv2D(32, (1,3)))
+model_CNN.add(Activation('relu'))
+model_CNN.add(MaxPooling2D(pool_size=(1,2)))
+model_CNN.add(Dropout(0.25))
+
+
+model_CNN.add(Flatten())
+
+#FC layer
+model_CNN.add(Dense(100))
+model_CNN.add(Activation('relu'))
+model_CNN.add(Dropout(0.5))
+model_CNN.add(Dense(num_classes))
+model_CNN.add(Activation('softmax'))
+
+"Summary"
+m = model_CNN.summary()
+st.write(m)
+
+opt = Adam(lr=0.001)
+model_CNN.compile(loss='categorical_crossentropy',
+              optimizer=opt,
+              metrics=['accuracy'])
+
+batch_size = 64
+epochs = 25
+hist = model_CNN.fit(x_train, y_train,
+              batch_size=batch_size,
+              epochs=epochs,
+              validation_data=(x_test, y_test),
+              shuffle=True)
+
+hist.history.keys()
+
+fig, a = plt.subplots()
+a.plot(hist.history['accuracy'], label='training set',marker='o', linestyle='solid',linewidth=1, markersize=6)
+a.plot(hist.history['val_accuracy'], label='validation set',marker='o', linestyle='solid',linewidth=1, markersize=6)
+plt.title("CNN-model accuracy")
+plt.xlabel('#Epochs')
+plt.ylabel('Acuracy')
+plt.legend(bbox_to_anchor=( 1., 1.))
+fig
+plt.show()
+
+fig, a = plt.subplots()
+a.plot(hist.history['loss'], label='training set',marker='o', linestyle='solid',linewidth=1, markersize=6)
+a.plot(hist.history['val_loss'], label='validation set',marker='o', linestyle='solid',linewidth=1, markersize=6)
+plt.title("CNN-model loss")
+plt.xlabel('#Epochs')
+plt.ylabel('Total Loss')
+plt.legend(bbox_to_anchor=( 1.35, 1.))
+fig
+plt.show()
+
+y_pred = model_MLP.predict(x_test)
+st.dataframe(y_pred)
+
+y_true = y_test.argmax(1)
+
+y_pred = y_pred.argmax(1)
+
+cf_matri = confusion_matrix(y_true, y_pred)
+
+
+fig = plt.figure(figsize = (10,10))
+sns.heatmap(cf_matri, annot = True)
+fig
+plt.show()
 
