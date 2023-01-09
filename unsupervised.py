@@ -603,7 +603,7 @@ def decoupage(X1,X2, l_batch):
         y.append(1)
     return X,y
 
-X,y = decoupage(aa2, AA2, 20)
+X,y = decoupage(aa2, AA2, 40)
 
 st.dataframe(X)
 st.dataframe(y)
