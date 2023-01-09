@@ -433,7 +433,7 @@ def viterbi(V, a, b, initial_distribution):
             result.append(domaine[int(s)])
     return result
 
-Verdi = viterbi(V, A,B, initial_distribution)
+Verdi = viterbi(V, A,D, initial_distribution)
 '### Générateur des états cachés en utilisant Viterbi'
 "Cette simulation des états avec Viterbi utilisée comme paramètre A et D et le résultat est le suivant "
 st.dataframe(Verdi)
