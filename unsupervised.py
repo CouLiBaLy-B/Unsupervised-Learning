@@ -592,7 +592,7 @@ c = AA[10:20]
 c
 
 def decoupage(X1,X2, l_batch):
-    L = pd.DataFrame(np.zeros(((len(X)-l_batch)*2, l_batch+1)))
+    L = pd.DataFrame(np.zeros(((len(X)-l_batch)*2, 2)), columns = ["X", "y"])
     for i in range(l_batch,(len(X1)-l_batch)):
         L.iloc[(i-l_batch),: ] = X1[(i-l_batch):i],0
     for i in range(l_batch,(len(X1)-l_batch)):
