@@ -569,11 +569,11 @@ def MSimulation(A,Mots, n):
     m = A.shape[0]
     mot = np.random.choice(range(m))
     mots = []
-    MOTS = [int(mot)]
+    MOTS = [int(mot)/89]
     mots.append(Mots[mot])
     for i in range(1, n):
         mot = np.random.choice(range(m), p =A[mot, :])
-        MOTS.append(int(mot))
+        MOTS.append(int(mot)/89)
         mots.append(Mots[mot])
     return mots, MOTS
 
@@ -624,11 +624,6 @@ y = to_categorical(y, num_classes)
 y_test = to_categorical(y_test, num_classes)
 y_train = to_categorical(y_train, num_classes)
 y_test = to_categorical(y_test, num_classes)
-
-# Réduction du poids des X
-"dime",x_test.shape
-x_test /= 89*np.ones(20)
-x_train /= 89*np.ones(20)
 
 
 # Apprentissage du model
