@@ -601,7 +601,7 @@ with col2:
 Le principe est le suivant :
  - Découper la chaine en batch de petite taille (c-a-d en petit segment de longueur definie)
  - A chaque batch on associe un label (0 ou 1) en fonction de la chaine (classe) de provenance
- - Que nous allons par la suite utiliser pour entrainé un modèle Convolutional Neural Network (CNN)'''
+ - Que nous allons par la suite utiliser pour entrainé un modèle RNN'''
 
 
 def decoupage(X1,X2, l_batch):
@@ -613,7 +613,7 @@ def decoupage(X1,X2, l_batch):
     for i in range(l_batch,(len(X1)-l_batch)):
         X.append(np.array(X2[(i-l_batch):i]))
         y.append(1)
-    return X,y
+    return np.array(X), np.array(y)
 
 X,y = decoupage(aa2, AA2, 20)
 if st.checkbox("Vu sur X et y", value = False):
@@ -636,21 +636,15 @@ if student:
     # --- END CODE HERE
 
 # Apprentissage du model
-# --- create the model
 # CODE-RNN1-2
-if student:
-    # --- START CODE HERE (02)
-    # --- Using the Sequential API
+if True:
+    
     model = Sequential([
         Embedding(89,32 , input_length=20),
         Lambda(lambda x: K.mean(x, axis=1)),
         Dense(1),
         Activation('sigmoid')
     ])
-    # --- END CODE HERE
-
-    # --- START CODE HERE (03)
-    # --- Using the Functional API
     X = Input(shape=(x_train.shape[1],))
     Z = Embedding(89,32, input_length=20)(X)
     Z = Lambda(lambda x: K.mean(x, axis=1))(Z)
@@ -671,8 +665,8 @@ scores = model.evaluate(X_test, y_test, verbose=0)
 hist.history.keys()
 
 fig, a = plt.subplots()
-a.plot(hist.history['accuracy'], label='training set',marker='o', linestyle='solid',linewidth=1, markersize=6)
-a.plot(hist.history['val_accuracy'], label='validation set',marker='o', linestyle='solid',linewidth=1, markersize=6)
+plt.plot(hist.history['accuracy'], label='training set',marker='o', linestyle='solid',linewidth=1, markersize=6)
+plt.plot(hist.history['val_accuracy'], label='validation set',marker='o', linestyle='solid',linewidth=1, markersize=6)
 plt.title("model accuracy")
 plt.xlabel('#Epochs')
 plt.ylabel('Acuracy')
@@ -680,9 +674,9 @@ plt.legend(bbox_to_anchor=( 1., 1.))
 fig
 plt.show()
 
-fig, a = plt.subplots()
-a.plot(hist.history['loss'], label='training set',marker='o', linestyle='solid',linewidth=1, markersize=6)
-a.plot(hist.history['val_loss'], label='validation set',marker='o', linestyle='solid',linewidth=1, markersize=6)
+fig, ax = plt.subplots()
+ax.plot(hist.history['loss'], label='training set',marker='o', linestyle='solid',linewidth=1, markersize=6)
+ax.plot(hist.history['val_loss'], label='validation set',marker='o', linestyle='solid',linewidth=1, markersize=6)
 plt.title("model loss")
 plt.xlabel('#Epochs')
 plt.ylabel('Total Loss')
@@ -700,8 +694,8 @@ y_pred = y_pred.argmax(1)
 cf_matri = confusion_matrix(y_true, y_pred)
 
 
-fig = plt.figure(figsize = (10,10))
-sns.heatmap(cf_matri, annot = True)
+fig ,ax= plt.subplots()
+ax = sns.heatmap(cf_matri, annot = True)
 fig
 plt.show()
 
