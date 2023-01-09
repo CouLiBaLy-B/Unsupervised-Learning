@@ -632,7 +632,7 @@ model_CNN = Sequential()
 
 #Block 1
 model_CNN.add(Conv2D(kernel_size= (1,3), padding='valid', strides=(1, 1),
-                 input_shape=x_train.shape[1:]))
+                 input_shape=20))
 model_CNN.add(Activation('relu'))
 model_CNN.add(Conv2D(32, (1,3)))
 model_CNN.add(Activation('relu'))
