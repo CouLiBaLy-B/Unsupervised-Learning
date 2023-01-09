@@ -615,7 +615,7 @@ def decoupage(X1,X2, l_batch):
         y.append(1)
     return np.array(X), np.array(y)
 def lot():
-    l = st.number_input("La taille des lots (segment) :",min_val = 10, max_val = 200, value = 50)
+    l = st.number_input("La taille des lots (segment) :",min_value = 10, max_value = 200, value = 50, key = "lot")
     return l
 l = lot()
 X,y = decoupage(aa2, AA2, l)
