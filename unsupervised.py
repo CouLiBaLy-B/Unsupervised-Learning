@@ -631,8 +631,8 @@ k = st.checkbox("Lancer l'apprentissage du modèle", value = False)
 if k:
     X_train = sequence.pad_sequences(x_train, maxlen=20)
     X_test = sequence.pad_sequences(x_test, maxlen=20)
-   #Apprentissage du model
-   # CODE-RNN1-2
+    #Apprentissage du model
+    # CODE-RNN
 
     
     model = Sequential([
@@ -645,7 +645,7 @@ if k:
     Z = Embedding(2,32, input_length=20)(X)
     Z = Lambda(lambda x: K.mean(x, axis=1))(Z)
     Z = Dense(2)(Z)
-    Y = Activation('softmax')(Z)
+    Y = Activation('sigmoid')(Z)
     model = Model(inputs=X, outputs=Y)
 
     st.write(model.summary())
