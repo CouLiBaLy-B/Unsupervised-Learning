@@ -629,26 +629,28 @@ K.clear_session()
 "Pour améliorer les performances du modèle, n'oubliez pas d'augmenter la quantité de donnée"
 k = st.checkbox("Lancer l'apprentissage du modèle", value = False)
 if k:
+   
     X_train = sequence.pad_sequences(x_train, maxlen=20)
     X_test = sequence.pad_sequences(x_test, maxlen=20)
-    #Apprentissage du model
-    # CODE-RNN
+  
 
-    
+# Creation et apprentissage du model
+# CODE-RNN
+if k:
     model = Sequential([
-        Embedding(2,32 , input_length=20),
+        Embedding(89,32 , input_length=20),
         Lambda(lambda x: K.mean(x, axis=1)),
         Dense(1),
-        Activation('relu')
+        Activation('sigmoid')
     ])
     X = Input(shape=(x_train.shape[1],))
-    Z = Embedding(2,32, input_length=20)(X)
+    Z = Embedding(89,32, input_length=20)(X)
     Z = Lambda(lambda x: K.mean(x, axis=1))(Z)
-    Z = Dense(2)(Z)
-    Y = Activation('softmax')(Z)
+    Z = Dense(1)(Z)
+    Y = Activation('sigmoid')(Z)
     model = Model(inputs=X, outputs=Y)
+    model.summary()
 
-    st.write(model.summary())
 
     # --- compile and fit the model
     model.compile(loss='binary_crossentropy', optimizer='adam', metrics=['accuracy'])
