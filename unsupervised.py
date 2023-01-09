@@ -651,8 +651,8 @@ if True:
     Z = Dense(1)(Z)
     Y = Activation('sigmoid')(Z)
     model = Model(inputs=X, outputs=Y)
-m = model.summary()
-st.write(m)
+
+st.write(model.summary())
 
 # --- compile and fit the model
 model.compile(loss='binary_crossentropy', optimizer='adam', metrics=['accuracy'])
