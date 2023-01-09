@@ -7,6 +7,8 @@ warnings.filterwarnings("ignore")
 import plotly.express as px
 import streamlit as st
 from PIL import Image
+from tensorflow.keras.utils import to_categorical
+from sklearn.model_selection import train_test_split
 from networkx.generators.random_graphs import fast_gnp_random_graph as nxf
 import scipy as sc
 st.set_page_config(
@@ -597,11 +599,20 @@ def decoupage(X1,X2, l_batch):
     for i in range(l_batch,(len(X1)-l_batch)):
         X.append(np.array(X2[(i-l_batch):i]))
         y.append(1)
-    return L,l
+    return X,y
 
 X,y = decoupage(aa, AA, 20)
 
 st.dataframe(X)
 st.dataframe(y)
 
+# Decoupage en train et test de nos données 
+
+x_train, x_test,y_train, y_test = train_test_split(X, y, test_size=100, random_state=42, shuffle=True,stratify=y)
+
+num_classes = 2
+y = to_categorical(y, num_classes)
+y_test = to_categorical(y_test, num_classes)
+y_train = to_categorical(y_train, num_classes)
+y_val = to_categorical(y_val, num_classes)
 
