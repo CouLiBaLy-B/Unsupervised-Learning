@@ -563,22 +563,24 @@ def MSimulation(A,Mots, n):
     m = A.shape[0]
     mot = np.random.choice(range(m))
     mots = []
+    MOTS = [mot]
     mots.append(Mots[mot])
     for i in range(1, n):
         mot = np.random.choice(range(m), p =A[mot, :])
+        MOTS.append(mots)
         mots.append(Mots[mot])
-    return mots
+    return mots, MOTS
 
-aa = MSimulation(A=A1, Mots = mots,  n=n)
-AA = MSimulation(A= A2,Mots = mots, n=n)
+aa1, aa2 = MSimulation(A=A1, Mots = mots,  n=n)
+AA1, AA2 = MSimulation(A= A2,Mots = mots, n=n)
 
 col1, col2 = st.columns(2)
 with col1:
     f"{n} simulations avec la matrice A1"
-    st.dataframe(aa)
+    st.dataframe(aa1)
 with col2:
     f"{n} simulations avec la matrice A2"
-    st.dataframe(AA)
+    st.dataframe(AA1)
 
 
 
@@ -601,7 +603,7 @@ def decoupage(X1,X2, l_batch):
         y.append(1)
     return X,y
 
-X,y = decoupage(aa, AA, 20)
+X,y = decoupage(aa2, AA2, 20)
 
 st.dataframe(X)
 st.dataframe(y)
