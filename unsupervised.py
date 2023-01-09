@@ -640,13 +640,13 @@ if student:
 if True:
     
     model = Sequential([
-        Embedding(89,32 , input_length=20),
+        Embedding(2,32 , input_length=20),
         Lambda(lambda x: K.mean(x, axis=1)),
         Dense(1),
         Activation('sigmoid')
     ])
     X = Input(shape=(x_train.shape[1],))
-    Z = Embedding(89,32, input_length=20)(X)
+    Z = Embedding(2,32, input_length=20)(X)
     Z = Lambda(lambda x: K.mean(x, axis=1))(Z)
     Z = Dense(1)(Z)
     Y = Activation('sigmoid')(Z)
@@ -659,6 +659,7 @@ model.compile(loss='binary_crossentropy', optimizer='adam', metrics=['accuracy']
 hist =model.fit(x_train, y_train, epochs=10, batch_size=20, validation_data=(x_test, y_test))
 
 scores = model.evaluate(X_test, y_test, verbose=0)
+
 
 "Accuracy:" , (scores[1]*100)
 
@@ -685,8 +686,8 @@ fig
 plt.show()
 
 y_pred = model.predict(x_test)
-st.dataframe(y_pred)
 
+st.dataframe(y_pred)
 y_true = y_test.argmax(1)
 
 y_pred = y_pred.argmax(1)
