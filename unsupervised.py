@@ -580,4 +580,22 @@ with col2:
 
 
 
+    
+"### Classifier"
+'''Utiliser un modèle de classification basé sur du deep learning
+Le principe est le suivant :
+ - Découper la chaine en batch de petite taille (c-a-d en petit segment de longueur definie)
+ - A chaque batch on associe un label (0 ou 1) en fonction de la chaine (classe) de provenance
+ - Que nous allons par la suite utiliser pour entrainé un modèle Convolutional Neural Network (CNN)'''
+
+def decoupage(X1,X2, l_batch):
+    L = pd.DataFrame(np.zeros(((len(X)-l_batch)*2, l_batch+1)))
+    for i in range(l_batch,(len(X1)-l_batch)):
+        L.iloc[(i-l_batch),: ] = X1[(i-l_batch):i],0
+    for i in range(l_batch,(len(X1)-l_batch)):
+        L.iloc[len(X1)+(i - l_batch), :] = X2[(i - l_batch):i], 1
+    return L
+
+L = decoupage(aa,AA, 10)
+L    
 
