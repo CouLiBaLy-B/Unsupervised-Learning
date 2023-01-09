@@ -565,7 +565,7 @@ if st.checkbox("Voulez vous vérifier le caractère stochastique de A1 et A2 ?",
 
 
 def n():
-    n = st.number_input("La taille la simulation :", min_value=100, max_value=10000, value=200)
+    n = st.number_input("La taille la simulation :", min_value=100, max_value=10000, value=500)
     return n
 
 n = n()
@@ -620,83 +620,79 @@ if st.checkbox("Vu sur X et y", value = False):
     st.dataframe(X)
     st.dataframe(y)
 
-'# Decoupage en train et test de nos données '
+# Decoupage en train et test de nos données 
+
+x_train, x_test, y_train, y_test = train_test_split(X, y, test_size=int(n*0.2), random_state=42, shuffle=True, stratify=y)
 
 
-x_train, x_test, y_train, y_test = train_test_split(X, y, test_size=100, random_state=42, shuffle=True, stratify=y)
-
-colab = True
-student = True
 K.clear_session()
-
-if student:
-    # --- START CODE HERE (01)
+"Pour améliorer les performances du modèle, n'oubliez pas d'augmenter la quantité de donnée
+k = st.checkbox("Lancer l'apprentissage du modèle", value = False)
+if k:
     X_train = sequence.pad_sequences(x_train, maxlen=20)
     X_test = sequence.pad_sequences(x_test, maxlen=20)
-    # --- END CODE HERE
+   #Apprentissage du model
+   # CODE-RNN1-2
 
-# Apprentissage du model
-# CODE-RNN1-2
-if True:
     
     model = Sequential([
-        Embedding(89,32 , input_length=20),
+        Embedding(2,32 , input_length=20),
         Lambda(lambda x: K.mean(x, axis=1)),
         Dense(1),
         Activation('relu')
     ])
     X = Input(shape=(x_train.shape[1],))
-    Z = Embedding(89,32, input_length=20)(X)
+    Z = Embedding(2,32, input_length=20)(X)
     Z = Lambda(lambda x: K.mean(x, axis=1))(Z)
-    Z = Dense(1)(Z)
-    Y = Activation('relu')(Z)
+    Z = Dense(2)(Z)
+    Y = Activation('softmax')(Z)
     model = Model(inputs=X, outputs=Y)
 
-st.write(model.summary())
+    st.write(model.summary())
 
-# --- compile and fit the model
-model.compile(loss='binary_crossentropy', optimizer='adam', metrics=['accuracy'])
-hist =model.fit(x_train, y_train, epochs=10, batch_size=20, validation_data=(x_test, y_test))
+    # --- compile and fit the model
+    model.compile(loss='binary_crossentropy', optimizer='adam', metrics=['accuracy'])
+    hist =model.fit(x_train, y_train, epochs=10, batch_size=20, validation_data=(x_test, y_test))
 
-scores = model.evaluate(X_test, y_test, verbose=0)
-
-
-"Accuracy:" , (scores[1]*100)
-
-hist.history.keys()
-
-fig, a = plt.subplots()
-plt.plot(hist.history['accuracy'], label='training set',marker='o', linestyle='solid',linewidth=1, markersize=6)
-plt.plot(hist.history['val_accuracy'], label='validation set',marker='o', linestyle='solid',linewidth=1, markersize=6)
-plt.title("model accuracy")
-plt.xlabel('#Epochs')
-plt.ylabel('Acuracy')
-plt.legend(bbox_to_anchor=( 1., 1.))
-fig
-plt.show()
-
-fig, ax = plt.subplots()
-ax.plot(hist.history['loss'], label='training set',marker='o', linestyle='solid',linewidth=1, markersize=6)
-ax.plot(hist.history['val_loss'], label='validation set',marker='o', linestyle='solid',linewidth=1, markersize=6)
-plt.title("model loss")
-plt.xlabel('#Epochs')
-plt.ylabel('Total Loss')
-plt.legend(bbox_to_anchor=( 1.35, 1.))
-fig
-plt.show()
-
-y_pred = model.predict(x_test)
-
-st.dataframe(y_pred)
-y_true = y_test.argmax(1)
-
-y_pred = y_pred.argmax(1)
-
-cf_matri = confusion_matrix(y_true, y_pred)
+    scores = model.evaluate(X_test, y_test, verbose=0)
 
 
-fig ,ax= plt.subplots()
-ax = sns.heatmap(cf_matri, annot = True)
-fig
-plt.show()
+    "Accuracy du modèle est :" , (scores[1]*100)
+
+    hist.history.keys()
+
+    fig, a = plt.subplots()
+    plt.plot(hist.history['accuracy'], label='training set',marker='o', linestyle='solid',linewidth=1, markersize=6)
+    plt.plot(hist.history['val_accuracy'], label='validation set',marker='o', linestyle='solid',linewidth=1, markersize=6)
+    plt.title("model accuracy")
+    plt.xlabel('#Epochs')
+    plt.ylabel('Acuracy')
+    plt.legend(bbox_to_anchor=( 1., 1.))
+    fig
+    plt.show()
+
+    fig, ax = plt.subplots()
+    ax.plot(hist.history['loss'], label='training set',marker='o', linestyle='solid',linewidth=1, markersize=6)
+    ax.plot(hist.history['val_loss'], label='validation set',marker='o', linestyle='solid',linewidth=1, markersize=6)
+    plt.title("model loss")
+    plt.xlabel('#Epochs')
+    plt.ylabel('Total Loss')
+    plt.legend(bbox_to_anchor=( 1.35, 1.))
+    fig
+    plt.show()
+
+    y_pred = model.predict(x_test)
+
+    st.dataframe(y_pred)
+    y_true = y_test.argmax(1)
+
+    y_pred = y_pred.argmax(1)
+
+    cf_matri = confusion_matrix(y_true, y_pred)
+
+
+    fig ,ax= plt.subplots()
+    ax = sns.heatmap(cf_matri, annot = True)
+    fig
+    plt.show()
 
