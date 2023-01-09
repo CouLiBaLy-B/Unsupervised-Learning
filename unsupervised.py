@@ -626,7 +626,7 @@ x_train, x_test, y_train, y_test = train_test_split(X, y, test_size=int(n*0.2), 
 
 
 K.clear_session()
-"Pour améliorer les performances du modèle, n'oubliez pas d'augmenter la quantité de donnée
+"Pour améliorer les performances du modèle, n'oubliez pas d'augmenter la quantité de donnée"
 k = st.checkbox("Lancer l'apprentissage du modèle", value = False)
 if k:
     X_train = sequence.pad_sequences(x_train, maxlen=20)
