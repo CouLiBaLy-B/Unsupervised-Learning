@@ -563,11 +563,11 @@ def MSimulation(A,Mots, n):
     m = A.shape[0]
     mot = np.random.choice(range(m))
     mots = []
-    MOTS = [mot]
+    MOTS = [int(mot)]
     mots.append(Mots[mot])
     for i in range(1, n):
         mot = np.random.choice(range(m), p =A[mot, :])
-        MOTS.append(mot)
+        MOTS.append(int(mot))
         mots.append(Mots[mot])
     return mots, MOTS
 
@@ -592,8 +592,7 @@ Le principe est le suivant :
  - A chaque batch on associe un label (0 ou 1) en fonction de la chaine (classe) de provenance
  - Que nous allons par la suite utiliser pour entrainé un modèle Convolutional Neural Network (CNN)'''
 
-aa2
-AA2
+
 def decoupage(X1,X2, l_batch):
     X = []
     y = []
@@ -606,11 +605,11 @@ def decoupage(X1,X2, l_batch):
     return X,y
 
 X,y = decoupage(aa2, AA2, 20)
+if st.checkbox("Vu sur X et y", value = False):
+    st.dataframe(X)
+    st.dataframe(y)
 
-st.dataframe(X)
-st.dataframe(y)
-
-# Decoupage en train et test de nos données 
+'# Decoupage en train et test de nos données '
 
 x_train, x_test,y_train, y_test = train_test_split(X, y, test_size=100, random_state=42, shuffle=True,stratify=y)
 
