@@ -626,9 +626,9 @@ y_train = to_categorical(y_train, num_classes)
 y_test = to_categorical(y_test, num_classes)
 
 # Réduction du poids des X
-
-x_test /= 89
-x_train /= 89
+"dime",x_test.shape
+x_test /= 89*np.ones(20)
+x_train /= 89*np.ones(20)
 
 
 # Apprentissage du model
