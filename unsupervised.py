@@ -592,6 +592,8 @@ Le principe est le suivant :
  - A chaque batch on associe un label (0 ou 1) en fonction de la chaine (classe) de provenance
  - Que nous allons par la suite utiliser pour entrainé un modèle Convolutional Neural Network (CNN)'''
 
+aa2
+AA2
 def decoupage(X1,X2, l_batch):
     X = []
     y = []
