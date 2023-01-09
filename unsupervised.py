@@ -643,11 +643,11 @@ if k:
         Dense(1),
         Activation('sigmoid')
     ])
-    X = Input(shape=(x_train.shape[1],))
+    X = Input(shape=(x_train.shape[0],))
     Z = Embedding(2,32, input_length=20)(X)
     Z = Lambda(lambda x: K.mean(x, axis=1))(Z)
     Z = Dense(1)(Z)
-    Y = Activation('sigmoid')(Z)
+    Y = Activation('softmax')(Z)
     model = Model(inputs=X, outputs=Y)
     model.summary()
 
