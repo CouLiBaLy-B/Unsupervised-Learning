@@ -622,7 +622,7 @@ if st.checkbox("Vu sur X et y", value = False):
 
 # Decoupage en train et test de nos données 
 m = int(n*0.2)
-x_train, x_test, y_train, y_test = train_test_split(X, y, test_size=50, random_state=42, shuffle=True, stratify=y)
+x_train, x_test, y_train, y_test = train_test_split(X, y, test_size=m, random_state=42, shuffle=True, stratify=y)
 
 
 K.clear_session()
@@ -638,13 +638,13 @@ if k:
 # CODE-RNN
 if k:
     model = Sequential([
-        Embedding(89,32 , input_length=20),
+        Embedding(2,32 , input_length=20),
         Lambda(lambda x: K.mean(x, axis=1)),
         Dense(1),
         Activation('sigmoid')
     ])
     X = Input(shape=(x_train.shape[1],))
-    Z = Embedding(89,32, input_length=20)(X)
+    Z = Embedding(2,32, input_length=20)(X)
     Z = Lambda(lambda x: K.mean(x, axis=1))(Z)
     Z = Dense(1)(Z)
     Y = Activation('sigmoid')(Z)
@@ -654,7 +654,7 @@ if k:
 
     # --- compile and fit the model
     model.compile(loss='binary_crossentropy', optimizer='adam', metrics=['accuracy'])
-    hist = model.fit(x_train, y_train, epochs=10, batch_size=20, validation_data=(x_test, y_test))
+    hist = model.fit(x_train, y_train, epochs=50, batch_size=32, validation_data=(x_test, y_test))
 
     scores = model.evaluate(X_test, y_test, verbose=0)
 
