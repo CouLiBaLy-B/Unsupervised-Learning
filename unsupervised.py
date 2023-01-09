@@ -599,7 +599,7 @@ def decoupage(X1,X2, l_batch):
         y.append(1)
     return L,l
 
-X,y = decoupe(aa, AA, 20)
+X,y = decoupage(aa, AA, 20)
 
 st.dataframe(X)
 st.dataframe(y)
