@@ -631,7 +631,7 @@ y_test = to_categorical(y_test, num_classes)
 model_CNN = Sequential()
 
 #Block 1
-model_CNN.add(Conv2D(kernel_size= 3, padding='valid', strides=(1, 1),
+model_CNN.add(Conv2D(kernel_size= 3, padding='valid', strides=1,
                  input_shape=20))
 model_CNN.add(Activation('relu'))
 model_CNN.add(Conv2D(32, 3))
