@@ -622,7 +622,7 @@ if st.checkbox("Vu sur X et y", value = False):
 
 # Decoupage en train et test de nos données 
 m = int(n*0.2)
-x_train, x_test, y_train, y_test = train_test_split(X, y, test_size=m, random_state=42, shuffle=True, stratify=y)
+x_train, x_test, y_train, y_test = train_test_split(X, y, test_size=50, random_state=42, shuffle=True, stratify=y)
 
 
 K.clear_session()
@@ -645,7 +645,7 @@ if k:
     Z = Embedding(2,32, input_length=20)(X)
     Z = Lambda(lambda x: K.mean(x, axis=1))(Z)
     Z = Dense(2)(Z)
-    Y = Activation('sigmoid')(Z)
+    Y = Activation('softmax')(Z)
     model = Model(inputs=X, outputs=Y)
 
     st.write(model.summary())
