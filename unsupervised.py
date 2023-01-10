@@ -736,10 +736,10 @@ où
 ### Forward
 $$
 \newcommand{\l}[1]{^{[#1]}}
-\underbr{Z\l1}{(m,n\l1)} = \underbr{X}{(m,n\l0)} \underbr{W\l1}{(n\l0,n\l1)}  + \underbr{b\l1}{n\l1} \\
-\underbr{A\l1}{(m,n\l1)} = g\l1(Z\l1) \\
-\underbr{Z\l2}{(m,n\l2)} = \underbr{A\l1}{(m,n\l1)} \underbr{W\l2}{(n\l1,n\l2)}  + \underbr{b\l2}{n\l2} \\
-\underbr{A\l2}{(m,n\l2)} = \sigma(Z^{[2]})
+{Z\l1}{(m,n\l1)} = {X}{(m,n\l0)} {W\l1}{(n\l0,n\l1)}  + {b\l1}{n\l1} \\
+{A\l1}{(m,n\l1)} = g\l1(Z\l1) \\
+{Z\l2}{(m,n\l2)} = {A\l1}{(m,n\l1)} {W\l2}{(n\l1,n\l2)}  + {b\l2}{n\l2} \\
+{A\l2}{(m,n\l2)} = \sigma(Z^{[2]})
 $$
 
 où 
@@ -755,20 +755,20 @@ $$
 \newcommand{\ddd}[2]{\frac{\partial #1}{\partial #2}}
 \newcommand{\L}[0]{\mathcal{L}}
 \newcommand{\l}[1]{^{[#1]}}
-\newcommand{\dZdeux}[0]{ \underbr{ \ddd{\L}{Z\l2} }{ (m,n\l2)} }
-\newcommand{\dWdeux}[0]{ \underbr{ \ddd{\L}{W\l2} }{ (n\l1,n\l2)} }
-\newcommand{\dbdeux}[0]{ \underbr{ \ddd{\L}{b\l2} }{ (n\l2)} }
-\newcommand{\dAun}[0]{ \underbr{ \ddd{\L}{A\l1} }{ (m,n\l1)} }
-\newcommand{\dZun}[0]{ \underbr{ \ddd{\L}{Z\l1} }{ (m,n\l1)} }
-\newcommand{\dWun}[0]{ \underbr{ \ddd{\L}{W\l1} }{ (n\l0,n\l1)} }
-\newcommand{\dbun}[0]{ \underbr{ \ddd{\L}{b\l1} }{ (n\l1)} }
+\newcommand{\dZdeux}[0]{ { \ddd{\L}{Z\l2} }{ (m,n\l2)} }
+\newcommand{\dWdeux}[0]{ { \ddd{\L}{W\l2} }{ (n\l1,n\l2)} }
+\newcommand{\dbdeux}[0]{ { \ddd{\L}{b\l2} }{ (n\l2)} }
+\newcommand{\dAun}[0]{ { \ddd{\L}{A\l1} }{ (m,n\l1)} }
+\newcommand{\dZun}[0]{ { \ddd{\L}{Z\l1} }{ (m,n\l1)} }
+\newcommand{\dWun}[0]{ { \ddd{\L}{W\l1} }{ (n\l0,n\l1)} }
+\newcommand{\dbun}[0]{ { \ddd{\L}{b\l1} }{ (n\l1)} }
 \\
-\dZdeux = \underbr{A\l2}{(m,n\l2)} - \underbr{Y}{(m,n\l2)}\\
-\dWdeux = \frac{1}{m} {\underbr{A\l1}{(m,n\l1)}}^{T} \dZdeux \\
+\dZdeux = {A\l2}{(m,n\l2)} - {Y}{(m,n\l2)}\\
+\dWdeux = \frac{1}{m} {{A\l1}{(m,n\l1)}}^{T} \dZdeux \\
 \dbdeux = \frac{1}{m} \sum_{i=1}^{m} \dZdeux \\
-\dAun = \dZdeux {\underbr{W\l2}{(n\l1,n\l2)}}^{T}\\
-\dZun = \dAun \: \odot \: {g\l1}' (\underbr{Z\l1}{(m,n\l1)})\\
-\dWun = \frac{1}{m} {\underbr{X}{(m,n^{[0]})}}^{T} \dZun \\
+\dAun = \dZdeux {{W\l2}{(n\l1,n\l2)}}^{T}\\
+\dZun = \dAun \: \odot \: {g\l1}' ({Z\l1}{(m,n\l1)})\\
+\dWun = \frac{1}{m} {{X}{(m,n^{[0]})}}^{T} \dZun \\
 \dbun = \frac{1}{m} \sum_{i=1}^{m} \dZun
 $$
 
@@ -844,7 +844,7 @@ def F_computeAccuracy(hat_y, y):
 
 X = F_standardize(X)
 
-X_train, X_test, y_train, y_test = model_selection.train_test_split(X, y, test_size=0.2)
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2)
 
 y_train = y_train.reshape(len(y_train), 1)
 y_test = y_test.reshape(len(y_test), 1)
