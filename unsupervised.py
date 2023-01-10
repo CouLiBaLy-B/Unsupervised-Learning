@@ -688,7 +688,6 @@ if k:
 
     y_pred = model.predict(x_test)
 
-    st.dataframe(y_pred)
     y_true = y_test.argmax(1)
 
     y_pred = y_pred.argmax(1)
@@ -701,3 +700,371 @@ if k:
     fig
     plt.show()
 
+    
+r"""
+## Objective:
+Objectif :
+Nous voulons implémenter un Perceptron multicouche (MLP) à deux couches avec 1 couche cachée en Python, pour un problème de classification.
+La sortie du réseau est simplement la sortie de plusieurs fonctions en cascade :
+- Transformations linéaires. On note les poids d'une transformation linéaire avec $W$ :
+
+- Biais additifs. On note les paramètres des biais additifs avec $b$
+- Les non-linéarités.
+Pour cela, nous allons mettre en œuvre :
+
+- propagation forward 
+- calculer cost/loss
+- propagation backward 
+- mettre à jour les paramètre
+
+De plus, nous définissons les grandeurs suivantes :
+
+- $n^{[0]}$ : nombre de neurones d'entrée
+- $n^{[1]}$ : nombre de neurones dans la couche cachée
+- $n^{[2]}$ : nombre de neurones dans la couche de sortie
+- $m$ : nombre de points de données d'apprentissage
+
+Le **coût** est la moyenne de la **perte** sur les données d'apprentissage. 
+Puisque nous avons affaire à un problème de classification binaire, nous utiliserons l'entropie croisée binaire.
+
+$$\mathcal{L} = - \left( y \log(\hat{y}) + (1-y) \log(1-\hat{y}) \right),$$
+
+où 
+- les $y$ sont les étiquettes de vérité du sol des données et 
+- les $\hat{y}$ sont les étiquettes estimées (sorties du réseau).
+
+### Forward
+$$
+\newcommand{\l}[1]{^{[#1]}}
+\underbr{Z\l1}{(m,n\l1)} = \underbr{X}{(m,n\l0)} \underbr{W\l1}{(n\l0,n\l1)}  + \underbr{b\l1}{n\l1} \\
+\underbr{A\l1}{(m,n\l1)} = g\l1(Z\l1) \\
+\underbr{Z\l2}{(m,n\l2)} = \underbr{A\l1}{(m,n\l1)} \underbr{W\l2}{(n\l1,n\l2)}  + \underbr{b\l2}{n\l2} \\
+\underbr{A\l2}{(m,n\l2)} = \sigma(Z^{[2]})
+$$
+
+où 
+- $g^{[1]}$ est une fonction d'activation non linéaire `Relu` (le code est fourni)
+- $\sigma$ est une fonction d'activation de sortie sigmoïde (le code est fourni)
+
+
+### Backward 
+
+Backward propagation peut être comme suite : 
+
+$$
+\newcommand{\ddd}[2]{\frac{\partial #1}{\partial #2}}
+\newcommand{\L}[0]{\mathcal{L}}
+\newcommand{\l}[1]{^{[#1]}}
+\newcommand{\dZdeux}[0]{ \underbr{ \ddd{\L}{Z\l2} }{ (m,n\l2)} }
+\newcommand{\dWdeux}[0]{ \underbr{ \ddd{\L}{W\l2} }{ (n\l1,n\l2)} }
+\newcommand{\dbdeux}[0]{ \underbr{ \ddd{\L}{b\l2} }{ (n\l2)} }
+\newcommand{\dAun}[0]{ \underbr{ \ddd{\L}{A\l1} }{ (m,n\l1)} }
+\newcommand{\dZun}[0]{ \underbr{ \ddd{\L}{Z\l1} }{ (m,n\l1)} }
+\newcommand{\dWun}[0]{ \underbr{ \ddd{\L}{W\l1} }{ (n\l0,n\l1)} }
+\newcommand{\dbun}[0]{ \underbr{ \ddd{\L}{b\l1} }{ (n\l1)} }
+\\
+\dZdeux = \underbr{A\l2}{(m,n\l2)} - \underbr{Y}{(m,n\l2)}\\
+\dWdeux = \frac{1}{m} {\underbr{A\l1}{(m,n\l1)}}^{T} \dZdeux \\
+\dbdeux = \frac{1}{m} \sum_{i=1}^{m} \dZdeux \\
+\dAun = \dZdeux {\underbr{W\l2}{(n\l1,n\l2)}}^{T}\\
+\dZun = \dAun \: \odot \: {g\l1}' (\underbr{Z\l1}{(m,n\l1)})\\
+\dWun = \frac{1}{m} {\underbr{X}{(m,n^{[0]})}}^{T} \dZun \\
+\dbun = \frac{1}{m} \sum_{i=1}^{m} \dZun
+$$
+
+Sur la base des formules précédentes, écrivez l'algorithme de rétropropagation correspondant.
+
+
+### Mise à jour des paramètres
+
+- Implémenter une **première version** dans laquelle les paramètres sont mis à jour en utilisant une **descente de gradient simple** :
+
+$$
+\newcommand{\ddd}[2]{\frac{\partial #1}{\partial #2}}
+\newcommand{\L}[0]{\mathcal{L}}
+W = W - \alpha \ddd{\L}{W}
+$$
+
+
+- Implémentez une **seconde version** dans laquelle les paramètres sont mis à jour en utilisant la **méthode du momentum** :
+
+$$
+\newcommand{\ddd}[2]{\frac{\partial #1}{\partial #2}}
+\newcommand{\L}[0]{\mathcal{L}}
+V_{dW}(t) = \beta V_{dW}(t-1) + (1-\beta) \ddd{\L}{W} \\
+W(t) = W(t-1) - \alpha V_{dW}(t)
+$$
+
+### Definition des fonctions
+"""
+
+def F_standardize(X):
+    """
+    standardiser X, c'est-à-dire soustraire la moyenne (sur les données) et diviser par l'écart-type (sur les données)
+    
+    Paramètres
+    ----------
+    X : tableau np de taille (m, n_0)
+        matrice contenant les données d'observation
+    
+    Retourne
+    -------
+    X : tableau np de taille (m, n_0)
+        version normalisée de X
+    """
+    
+    X -= np.mean(X, axis=0, keepdims=True) 
+    X /= (np.std(X, axis=0, keepdims=True) + 1e-16)
+    return X
+
+def F_sigmoid(x):
+   
+    return 1 / (1 + np.exp(-x))
+
+def F_relu(x):
+    
+    return x * (x > 0)
+
+def F_dRelu(x):
+    x[x<=0] = 0
+    x[x>0] = 1
+    return x
+def F_computeCost(hat_y, y):
+    m = y.shape[0]
+    loss = -(y*np.log(hat_y) + (1-y)*np.log(1-hat_y))
+    cost = np.sum(loss) / m
+    return cost
+
+def F_computeAccuracy(hat_y, y):
+    m = y.shape[0]    
+    class_y = np.copy(hat_y)
+    class_y[class_y>=0.5]=1
+    class_y[class_y<0.5]=0
+    return np.sum(class_y==y) / m
+
+X = F_standardize(X)
+
+X_train, X_test, y_train, y_test = model_selection.train_test_split(X, y, test_size=0.2)
+
+y_train = y_train.reshape(len(y_train), 1)
+y_test = y_test.reshape(len(y_test), 1)
+
+n_0 = X_train.shape[1]
+n_2 = 1
+
+# Définir la classe MLP avec les méthodes avant, arrière et de mise à jour.
+
+In the code we will denote 
+- $\frac{\partial \mathcal{L}}{\partial W^{[1]}}$ by ``dW1``, 
+- $\frac{\partial \mathcal{L}}{\partial b^{[1]}}$ by ``db1``, 
+- $\frac{\partial \mathcal{L}}{\partial W^{[2]}}$ by ``dW2``, 
+- $\frac{\partial \mathcal{L}}{\partial b^{[2]}}$ by ``db2``, 
+- $\frac{\partial \mathcal{L}}{\partial Z^{[1]}}$ by ``dZ1``, 
+- $\frac{\partial \mathcal{L}}{\partial A^{[1]}}$ by ``dA1``, 
+- ...
+
+class C_MultiLayerPerceptron:
+    """
+    Une classe utilisée pour représenter un perceptron multicouche avec 1 couche cachée.
+
+    ...
+
+    Attributs
+    ----------
+    W1, b1, W2, b2 :
+        poids et biais à apprendre
+    Z1, A1, Z2, A2 :
+        valeurs des neurones internes à utiliser pour la rétropropagation
+    dW1, db1, dW2, db2, dZ1, dZ2 :
+        dérivées partielles de la perte en fonction des paramètres.
+        exemple : dW1 = dLoss/dW1
+    VdW1, Vdb1, VdW2, Vdb2 :
+        termes de momentum
+    do_bin0_multi1 :
+        détermine si nous résolvons un problème de classification binaire ou multi-classes.
+        
+    Méthodes
+    -------
+    propagation avant
+    
+    propagation arrière
+    
+    mettre_paramètres_à_jour
+    
+    """
+
+    W1, b1, W2, b2 = [], [], [], []
+    A0, Z1, A1, Z2, A2 = [], [], [], [], []
+    dW1, db1, dW2, db2 = [], [], [], []   
+    dZ1, dA1, dZ2 = [], [], []
+    # --- for momentum
+    VdW1, Vdb1, VdW2, Vdb2 = [], [], [], []     
+    
+    def __init__(self, n_0, n_1, n_2):
+        self.W1 = np.random.randn(n_0, n_1) * 0.01
+        self.b1 = np.zeros(shape=(1, n_1))
+        self.W2 = np.random.randn(n_1, n_2) * 0.01
+        self.b2 = np.zeros(shape=(1, n_2))        
+        # --- for momentum
+        self.VdW1 = np.zeros(shape=(n_0, n_1)) 
+        self.Vdb1 = np.zeros(shape=(1, n_1))
+        self.VdW2 = np.zeros(shape=(n_1, n_2))
+        self.Vdb2 = np.zeros(shape=(1, n_2))
+        return
+
+    
+    def __setattr__(self, attrName, val):
+        if hasattr(self, attrName):
+            self.__dict__[attrName] = val
+        else:
+            raise Exception("self.%s note part of the fields" % attrName)
+
+            
+
+    def M_forwardPropagation(self, X):
+        """Propagation vers l'avant dans le MLP
+
+        Paramètres
+        ----------
+        X : tableau numpy (m, n_0)
+            données d'observation
+
+        Retourner
+        ------
+        hat_y : tableau numpy (m, 1)
+            valeur prédite par le MLP
+        """
+
+        self.A0 = X
+
+        self.Z1 = self.A0 @ self.W1 + self.b1
+        self.A1 = F_relu(self.Z1)
+
+        self.Z2 = self.A1 @ self.W2 + self.b2
+        self.A2 = F_sigmoid(self.Z2)
+
+        hat_y = self.A2
+       
+
+        return hat_y
+
+
+    def M_backwardPropagation(self, X, y):
+        """Propagation vers l'arrière dans le MLP
+
+        Paramètres
+        ----------
+        X : tableau numpy (m, n_0)
+            données d'observation
+        y : tableau numpy (m, 1)
+            classe de vérité fondamentale à prédire
+            
+        """
+        
+        m = y.shape[0]
+
+        self.dZ2 = self.A2 - y
+        self.dW2 = (1/m) * (self.A1.T @ self.dZ2)
+        self.db2 = (1/m) * np.sum(self.dZ2, axis = 0, keepdims = True)
+        self.dA1 = self.dZ2 @ self.W2.T
+
+        self.dZ1 = np.multiply(self.dA1,F_dRelu(self.Z1))
+        self.dW1 = (1/m) * (self.A0.T @ self.dZ1)
+        self.db1 = (1/m) * np.sum(self.dZ1, axis=0, keepdims = True)
+
+        return
+
+    
+    def M_gradientDescent(self, alpha):
+        """Mettre à jour les paramètres du réseau en utilisant la descente de gradient
+
+        Paramètres
+        ----------
+        alpha : float scalar
+            quantité de mise à jour à chaque étape de la descente de gradient
+            
+        """
+        self.W1 = self.W1 - alpha * self.dW1 
+        self.b1 = self.b1 - alpha * self.db1
+        self.W2 = self.W2 - alpha * self.dW2
+        self.b2 = self.b2 - alpha * self.db2
+        return
+
+    
+    def M_momentum(self, alpha, beta):
+        """Mettre à jour les paramètres du réseau en utilisant la méthode momentum
+
+        Paramètres
+        ----------
+        alpha : float scalar
+            quantité de mise à jour à chaque étape de la descente du gradient
+        beta : float scalar
+            terme de momentum 
+        """  
+        
+        self.VdW1 = beta * self.VdW1 + (1 - beta) * self.dW1
+        self.W1 = self.W1 - alpha * self.VdW1
+
+        self.Vdb1 = beta * self.Vdb1 + (1 - beta) * self.db1
+        self.b1 = self.b1 - alpha * self.Vdb1
+
+        self.VdW2 = beta * self.VdW2 + (1 - beta) * self.dW2
+        self.W2 = self.W2 - alpha * self.VdW2
+
+        self.Vdb2 = beta * self.Vdb2 + (1 - beta) * self.db2
+        self.b2 = self.b2 - alpha * self.Vdb2
+     
+        return
+    
+# hyper-parameters
+n_1 = 10 # number of hidden neurons
+nb_epoch = 5000 # number of epochs (number of iterations over full training set)
+alpha=0.1 # learning rate
+beta=0.9 # beta parameters for momentum
+
+
+# Instantiate the class MLP with providing 
+# the size of the various layers (n_0=n_input, n_1=n_hidden, n_2=n_output) 
+myMLP = C_MultiLayerPerceptron(n_0, n_1, n_2)
+
+train_cost, train_accuracy, test_cost, test_accuracy = [], [], [], []
+
+# Run over epochs
+for num_epoch in range(0, nb_epoch):
+    
+    # --- Forward
+    hat_y_train = myMLP.M_forwardPropagation(X_train)
+    
+    # ---  resultat sur train
+    train_cost.append( F_computeCost(hat_y_train, y_train) )
+    train_accuracy.append( F_computeAccuracy(hat_y_train, y_train) )
+    
+    # --- Backward
+    myMLP.M_backwardPropagation(X_train, y_train)
+    
+    # --- Mise à jour
+    myMLP.M_gradientDescent(alpha)
+    myMLP.M_momentum(alpha, beta)
+
+    # --- resultat sur test
+    hat_y_test = myMLP.M_forwardPropagation(X_test)
+    test_cost.append( F_computeCost(hat_y_test, y_test) )    
+    test_accuracy.append( F_computeAccuracy(hat_y_test, y_test) )
+    
+    if (num_epoch % 500)==0: 
+        st.write("epoch: {0:d} (cost: train {1:.2f} test {2:.2f}) (accuracy: train {3:.2f} test {4:.2f})".format(num_epoch, train_cost[-1], test_cost[-1], train_accuracy[-1], test_accuracy[-1]))
+
+plt.subplot(1,2,1)
+plt.plot(train_cost, 'r')
+plt.plot(test_cost, 'g--')
+plt.xlabel('# epoch')
+plt.ylabel('loss')
+plt.grid(True)
+
+plt.subplot(1,2,2)
+plt.plot(train_accuracy, 'r')
+plt.plot(test_accuracy, 'g--')
+plt.xlabel('# epoch')
+plt.ylabel('accuracy')
+plt.grid(True)
+    
