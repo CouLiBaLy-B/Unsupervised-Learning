@@ -625,7 +625,8 @@ if st.checkbox("Vu sur X et y", value = False):
 
 
 r"""
-## Objective:
+### Méthode 1 :
+### Objective:
 Objectif :
 Nous voulons implémenter un Perceptron multicouche (MLP) à deux couches avec 1 couche cachée en Python, pour un problème de classification.
 La sortie du réseau est simplement la sortie de plusieurs fonctions en cascade :
@@ -940,12 +941,20 @@ class C_MultiLayerPerceptron:
         self.b2 = self.b2 - alpha * self.Vdb2
      
         return
-    
-# hyper-parameters
-n_1 = 10 # nombre de neurons cachés
-nb_epoch = 5000 # nombre d'epochs
-alpha=0.1 # learning rate
-beta=0.9 # beta parameters for momentum
+  
+def parametre():
+    col1, col2, col3 , col4 = st.columns(4)
+    with col1:
+        n1 = st.number_input("nombre de neurons cachés", min_value= 1, max_value=100, value=10)
+    with col2:
+        n2 = st.number_input("nombre d'epochs", min_value=10, max_value=10000, value=5000)
+    with col3:
+        n3 = st.number_input("learning rate", min_value=0.0, max_value=1.0, value=0.1)
+    with col4:
+        n4 = st.number_input("paramètres bêta pour le momentum", min_value=0.0, max_value=2.0, value=0.9)
+    return n1,n2,n3, n4
+
+n_1, nb_epoch,alpha,beta = parametre()
 
 
 # Instancie la classe MLP en fournissant 
@@ -980,29 +989,37 @@ for num_epoch in range(0, nb_epoch):
     if (num_epoch % 500)==0: 
         st.write("epoch: {0:d} (cost: train {1:.2f} test {2:.2f}) (accuracy: train {3:.2f} test {4:.2f})".format(num_epoch, train_cost[-1], test_cost[-1], train_accuracy[-1], test_accuracy[-1]))
 
-plt.subplot(1,2,1)
-plt.plot(train_cost, 'r')
-plt.plot(test_cost, 'g--')
-plt.xlabel('# epoch')
-plt.ylabel('loss')
-plt.grid(True)
-
-plt.subplot(1,2,2)
-plt.plot(train_accuracy, 'r')
-plt.plot(test_accuracy, 'g--')
-plt.xlabel('# epoch')
-plt.ylabel('accuracy')
-plt.grid(True)
-plt.show()
+col1,col2 = st.columns(2)
+with col1:
+    fig, ax = plt.subplot()
+    ax.plot(train_cost, 'r')
+    ax.plot(test_cost, 'g--')
+    plt.xlabel('# epoch')
+    plt.ylabel('loss')
+    plt.grid(True)
+    fig
+    plt.show()
+with col2:
+    fig, ax = plt.subplot()
+    ax.plot(train_accuracy, 'r')
+    ax.plot(test_accuracy, 'g--')
+    plt.xlabel('# epoch')
+    plt.ylabel('accuracy')
+    plt.grid(True)
+    fig
+    plt.show()
     
+
+K.clear_session()
+
+"""### Deuxième méthode
+Pour améliorer les performances du modèle, n'oubliez pas d'augmenter la quantité de donnée"""
 
 # Decoupage en train et test de nos données 
 m = int(n*0.2)
 x_train, x_test, y_train, y_test = train_test_split(X, y, test_size=m, random_state=42, shuffle=True, stratify=y)
 
 
-K.clear_session()
-"Pour améliorer les performances du modèle, n'oubliez pas d'augmenter la quantité de donnée"
 k = st.checkbox("Lancer l'apprentissage du modèle du RNN", value = False)
 if k:
    
