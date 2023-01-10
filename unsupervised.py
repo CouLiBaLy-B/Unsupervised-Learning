@@ -601,7 +601,7 @@ with col2:
 Le principe est le suivant :
  - Découper la chaine en batch de petite taille (c-a-d en petit segment de longueur definie)
  - A chaque batch on associe un label (0 ou 1) en fonction de la chaine (classe) de provenance
- - Que nous allons par la suite utiliser pour entrainé un modèle RNN'''
+ - Que nous allons par la suite utiliser pour entrainé un modèle Perceptron multicouche (MLP) et d'un RNN'''
 
 
 def decoupage(X1,X2, l_batch):
@@ -623,84 +623,7 @@ if st.checkbox("Vu sur X et y", value = False):
     st.dataframe(X)
     st.dataframe(y)
 
-# Decoupage en train et test de nos données 
-m = int(n*0.2)
-x_train, x_test, y_train, y_test = train_test_split(X, y, test_size=m, random_state=42, shuffle=True, stratify=y)
 
-
-K.clear_session()
-"Pour améliorer les performances du modèle, n'oubliez pas d'augmenter la quantité de donnée"
-k = st.checkbox("Lancer l'apprentissage du modèle", value = False)
-if k:
-   
-    X_train = sequence.pad_sequences(x_train, maxlen=l)
-    X_test = sequence.pad_sequences(x_test, maxlen=l)
-  
-
-# Creation et apprentissage du model
-# CODE-RNN
-if k:
-    model = Sequential([
-        Embedding(2,32 , input_length=l),
-        Lambda(lambda x: K.mean(x, axis=1)),
-        Dense(1),
-        Activation('sigmoid')
-    ])
-    X = Input(shape=(x_train.shape[1],))
-    Z = Embedding(2,32, input_length=l)(X)
-    Z = Lambda(lambda x: K.mean(x, axis=1))(Z)
-    Z = Dense(1)(Z)
-    Y = Activation('softmax')(Z)
-    model = Model(inputs=X, outputs=Y)
-    model.summary()
-
-
-    # --- compile and fit the model
-    model.compile(loss='binary_crossentropy', optimizer='adam', metrics=['accuracy'])
-    hist = model.fit(x_train, y_train, epochs=50, batch_size=32, validation_data=(x_test, y_test))
-
-    scores = model.evaluate(X_test, y_test, verbose=0)
-
-
-    "Accuracy du modèle est :" , (scores[1]*100)
-
-    hist.history.keys()
-
-    fig, a = plt.subplots()
-    plt.plot(hist.history['accuracy'], label='training set',marker='o', linestyle='solid',linewidth=1, markersize=6)
-    plt.plot(hist.history['val_accuracy'], label='validation set',marker='o', linestyle='solid',linewidth=1, markersize=6)
-    plt.title("model accuracy")
-    plt.xlabel('#Epochs')
-    plt.ylabel('Acuracy')
-    plt.legend(bbox_to_anchor=( 1., 1.))
-    fig
-    plt.show()
-
-    fig, ax = plt.subplots()
-    ax.plot(hist.history['loss'], label='training set',marker='o', linestyle='solid',linewidth=1, markersize=6)
-    ax.plot(hist.history['val_loss'], label='validation set',marker='o', linestyle='solid',linewidth=1, markersize=6)
-    plt.title("model loss")
-    plt.xlabel('#Epochs')
-    plt.ylabel('Total Loss')
-    plt.legend(bbox_to_anchor=( 1.35, 1.))
-    fig
-    plt.show()
-
-    y_pred = model.predict(x_test)
-
-    y_true = y_test.argmax(1)
-
-    y_pred = y_pred.argmax(1)
-
-    cf_matri = confusion_matrix(y_true, y_pred)
-
-
-    fig ,ax= plt.subplots()
-    ax = sns.heatmap(cf_matri, annot = True)
-    fig
-    plt.show()
-
-    
 r"""
 ## Objective:
 Objectif :
@@ -795,8 +718,9 @@ V_{dW}(t) = \beta V_{dW}(t-1) + (1-\beta) \ddd{\L}{W} \\
 W(t) = W(t-1) - \alpha V_{dW}(t)
 $$
 
-### Definition des fonctions
+
 """
+### Definition des fonctions
 
 def F_standardize(X):
     """
@@ -854,13 +778,13 @@ n_2 = 1
 
 r"""# Définir la classe MLP avec les méthodes avant, arrière et de mise à jour.
 
-In the code we will denote 
-- $\frac{\partial \mathcal{L}}{\partial W^{[1]}}$ by ``dW1``, 
-- $\frac{\partial \mathcal{L}}{\partial b^{[1]}}$ by ``db1``, 
-- $\frac{\partial \mathcal{L}}{\partial W^{[2]}}$ by ``dW2``, 
-- $\frac{\partial \mathcal{L}}{\partial b^{[2]}}$ by ``db2``, 
-- $\frac{\partial \mathcal{L}}{\partial Z^{[1]}}$ by ``dZ1``, 
-- $\frac{\partial \mathcal{L}}{\partial A^{[1]}}$ by ``dA1``, 
+Dans le code, nous désignerons 
+- $\frac{\partial \mathcal{L}}{\partial W^{[1]}}$ par ``dW1``, 
+- $\frac{\partial \mathcal{L}}{\partial b^{[1]}}$ par ``db1``, 
+- $\frac{\partial \mathcal{L}}{\partial W^{[2]}}$ par ``dW2``, 
+- $\frac{\partial \mathcal{L}}{\partial b^{[2]}}$ par ``db2``, 
+- $\frac{\partial \mathcal{L}}{\partial Z^{[1]}}$ par ``dZ1``, 
+- $\frac{\partial \mathcal{L}}{\partial A^{[1]}}$ par ``dA1``, 
 - ...
 """
 
@@ -1018,19 +942,20 @@ class C_MultiLayerPerceptron:
         return
     
 # hyper-parameters
-n_1 = 10 # number of hidden neurons
-nb_epoch = 5000 # number of epochs (number of iterations over full training set)
+n_1 = 10 # nombre de neurons cachés
+nb_epoch = 5000 # nombre d'epochs
 alpha=0.1 # learning rate
 beta=0.9 # beta parameters for momentum
 
 
-# Instantiate the class MLP with providing 
-# the size of the various layers (n_0=n_input, n_1=n_hidden, n_2=n_output) 
+# Instancie la classe MLP en fournissant 
+# la taille des différentes couches (n_0=n_input, n_1=n_hidden, n_2=n_output) 
+
 myMLP = C_MultiLayerPerceptron(n_0, n_1, n_2)
 
 train_cost, train_accuracy, test_cost, test_accuracy = [], [], [], []
 
-# Run over epochs
+
 for num_epoch in range(0, nb_epoch):
     
     # --- Forward
@@ -1068,4 +993,84 @@ plt.plot(test_accuracy, 'g--')
 plt.xlabel('# epoch')
 plt.ylabel('accuracy')
 plt.grid(True)
+plt.show()
+    
+
+# Decoupage en train et test de nos données 
+m = int(n*0.2)
+x_train, x_test, y_train, y_test = train_test_split(X, y, test_size=m, random_state=42, shuffle=True, stratify=y)
+
+
+K.clear_session()
+"Pour améliorer les performances du modèle, n'oubliez pas d'augmenter la quantité de donnée"
+k = st.checkbox("Lancer l'apprentissage du modèle du RNN", value = False)
+if k:
+   
+    X_train = sequence.pad_sequences(x_train, maxlen=l)
+    X_test = sequence.pad_sequences(x_test, maxlen=l)
+  
+
+# Creation et apprentissage du model
+# CODE-RNN
+if k:
+    model = Sequential([
+        Embedding(2,32 , input_length=l),
+        Lambda(lambda x: K.mean(x, axis=1)),
+        Dense(1),
+        Activation('sigmoid')
+    ])
+    X = Input(shape=(x_train.shape[1],))
+    Z = Embedding(2,32, input_length=l)(X)
+    Z = Lambda(lambda x: K.mean(x, axis=1))(Z)
+    Z = Dense(1)(Z)
+    Y = Activation('softmax')(Z)
+    model = Model(inputs=X, outputs=Y)
+    model.summary()
+
+
+    # --- compile and fit the model
+    model.compile(loss='binary_crossentropy', optimizer='adam', metrics=['accuracy'])
+    hist = model.fit(x_train, y_train, epochs=50, batch_size=32, validation_data=(x_test, y_test))
+
+    scores = model.evaluate(X_test, y_test, verbose=0)
+
+
+    "Accuracy du modèle est :" , (scores[1]*100)
+
+    hist.history.keys()
+
+    fig, a = plt.subplots()
+    plt.plot(hist.history['accuracy'], label='training set',marker='o', linestyle='solid',linewidth=1, markersize=6)
+    plt.plot(hist.history['val_accuracy'], label='validation set',marker='o', linestyle='solid',linewidth=1, markersize=6)
+    plt.title("model accuracy")
+    plt.xlabel('#Epochs')
+    plt.ylabel('Acuracy')
+    plt.legend(bbox_to_anchor=( 1., 1.))
+    fig
+    plt.show()
+
+    fig, ax = plt.subplots()
+    ax.plot(hist.history['loss'], label='training set',marker='o', linestyle='solid',linewidth=1, markersize=6)
+    ax.plot(hist.history['val_loss'], label='validation set',marker='o', linestyle='solid',linewidth=1, markersize=6)
+    plt.title("model loss")
+    plt.xlabel('#Epochs')
+    plt.ylabel('Total Loss')
+    plt.legend(bbox_to_anchor=( 1.35, 1.))
+    fig
+    plt.show()
+
+    y_pred = model.predict(x_test)
+
+    y_true = y_test.argmax(1)
+
+    y_pred = y_pred.argmax(1)
+
+    cf_matri = confusion_matrix(y_true, y_pred)
+
+
+    fig ,ax= plt.subplots()
+    ax = sns.heatmap(cf_matri, annot = True)
+    fig
+    plt.show()
+
     
