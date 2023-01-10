@@ -852,7 +852,7 @@ y_test = y_test.reshape(len(y_test), 1)
 n_0 = X_train.shape[1]
 n_2 = 1
 
-# Définir la classe MLP avec les méthodes avant, arrière et de mise à jour.
+r"""# Définir la classe MLP avec les méthodes avant, arrière et de mise à jour.
 
 In the code we will denote 
 - $\frac{\partial \mathcal{L}}{\partial W^{[1]}}$ by ``dW1``, 
@@ -862,6 +862,7 @@ In the code we will denote
 - $\frac{\partial \mathcal{L}}{\partial Z^{[1]}}$ by ``dZ1``, 
 - $\frac{\partial \mathcal{L}}{\partial A^{[1]}}$ by ``dA1``, 
 - ...
+"""
 
 class C_MultiLayerPerceptron:
     """
