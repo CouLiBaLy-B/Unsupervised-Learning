@@ -1009,7 +1009,7 @@ with col2:
     fig
     plt.show()
     
-
+" comme on peut s'attendre, les performances dependront de la taille des segments. Plus c'est long plus c'est précis."
 K.clear_session()
 
 """### Deuxième méthode
