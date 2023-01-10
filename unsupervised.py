@@ -991,7 +991,7 @@ for num_epoch in range(0, nb_epoch):
 
 col1,col2 = st.columns(2)
 with col1:
-    fig, ax = plt.subplot()
+    fig, ax = plt.subplots()
     ax.plot(train_cost, 'r')
     ax.plot(test_cost, 'g--')
     plt.xlabel('# epoch')
@@ -1000,7 +1000,7 @@ with col1:
     fig
     plt.show()
 with col2:
-    fig, ax = plt.subplot()
+    fig, ax = plt.subplots()
     ax.plot(train_accuracy, 'r')
     ax.plot(test_accuracy, 'g--')
     plt.xlabel('# epoch')
@@ -1091,3 +1091,4 @@ if k:
     plt.show()
 
     
+"# Fin merci pour votre lecture"
