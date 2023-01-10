@@ -30,7 +30,7 @@ st.set_page_config(
 '''
 # Projet d'unsupervised Learning
 '''
-"## Bourahima COULIBALY "
+"## Ibrahim COULIBALY "
 "## M2 Data Science"
 "## Université Paris Saclay"
 
