@@ -11,23 +11,9 @@ This project implements various unsupervised learning concepts including Markov 
 - Deep learning classifiers (MLP and RNN) for sequence classification
 
 ## Installation
-To run this project, you need to install the following Python libraries:
+To run this project, you need to install the requirements:
 ```
-numpy
-pandas
-networkx
-matplotlib
-plotly
-tensorflow
-streamlit
-PIL
-scikit-learn
-scipy
-```
-
-You can install these libraries using pip:
-```
-pip install numpy pandas networkx matplotlib plotly tensorflow streamlit pillow scikit-learn scipy
+pip install -r requirements.txt
 ```
 
 ## Usage

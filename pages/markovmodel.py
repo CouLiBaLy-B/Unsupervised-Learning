@@ -5,9 +5,17 @@ from src.markv import MarkovModel, WebSimulation
 
 # Usage
 domaine = ["Sport", "Culture", "Beauté"]
-Mots = ["Abdominaux", "Cosmétiques", "Livres", "Age", "Force", "Endurance", "Résilience", "Crème", "Histoire", "Mathématiques"]
-A = np.array([0.7, 0.2, 0.1, 0.25, 0.7, 0.05, 0.1, 0.1, 0.8], dtype=float).reshape((3, 3))
-B = np.array([0.2, 0, 0.1, 0, 0.1, 0.3, 0.1, 0.3, 0, 0.1, 0.2, 0.2, 0.2, 0, 0.1, 0.3, 0, 0, 0.1, 0.1, 0.1, 0, 0, 0.2, 0, 0.2, 0, 0, 0.1, 0], dtype=float).reshape((10, 3)).T
+Mots = ["Abdominaux", "Cosmétiques", "Livres",
+        "Age", "Force", "Endurance", "Résilience",
+        "Crème", "Histoire", "Mathématiques"]
+A = np.array([0.7, 0.2, 0.1, 0.25, 0.7,
+              0.05, 0.1, 0.1, 0.8], dtype=float).reshape((3, 3))
+B = np.array([0.2, 0, 0.1, 0, 0.1, 0.3, 0.1,
+              0.3, 0, 0.1, 0.2, 0.2, 0.2, 0,
+              0.1, 0.3, 0, 0, 0.1, 0.1, 0.1,
+              0, 0, 0.2, 0, 0.2, 0, 0, 0.1, 0], 
+              dtype=float).reshape((10, 3)
+                                   ).T
 
 markov_model = MarkovModel(domaine, Mots, A, B)
 web_simulation = WebSimulation(markov_model)
@@ -19,8 +27,18 @@ st.markdown(
     </h1>""",
     unsafe_allow_html=True,
 )
-n = st.number_input("Taille de la simulation", min_value=10, max_value=200, value=100)
-m = st.number_input("Largeur de la simulation", min_value=1, max_value=100, value=30)
+n = st.number_input(
+    "Taille de la simulation",
+    min_value=10,
+    max_value=200,
+    value=100
+    )
+m = st.number_input(
+    "Largeur de la simulation",
+    min_value=1,
+    max_value=100,
+    value=30
+    )
 
 if st.button("Lancer la simulation"):
     results = web_simulation.run_simulation(n, m)
@@ -36,9 +54,17 @@ if st.button("Lancer la simulation"):
     # Estimation des paramètres
     V = mat["Mots clefs_0"].values
     estimated_params = web_simulation.estimate_parameters(V)
-    st.write("Estimateurs de Baum-Welch:")
-    st.write("Matrice A estimée:", estimated_params["a"])
-    st.write("Matrice B estimée:", estimated_params["b"])
+    st.write(
+        "Estimateurs de Baum-Welch:"
+        )
+    st.write(
+        "Matrice A estimée:",
+        estimated_params["a"]
+        )
+    st.write(
+        "Matrice B estimée:",
+        estimated_params["b"]
+        )
 
     # Décodage des états
     decoded_states = web_simulation.decode_states(V)

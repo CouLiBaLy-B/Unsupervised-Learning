@@ -36,8 +36,11 @@ st.markdown(
 st.markdown(
     """<h2 style='text-align: center; background-color: #2D3E50; color: #FFFFFF'>
 Ibrahim COULIBALY
+
 M2 Data Science
+
 Université Paris Saclay
+
 </h1>""",
     unsafe_allow_html=True,
 )
