@@ -5,19 +5,19 @@ import matplotlib.pyplot as plt
 import warnings
 warnings.filterwarnings("ignore")
 import plotly.express as px
-from tensorflow.keras.datasets import imdb
-#from tensorflow.keras import utils
+from keras.datasets import imdb
+#from keras import utils
 
-from tensorflow.keras import backend as K
-from tensorflow.keras import Model
-from tensorflow.keras.models import Sequential
-from tensorflow.keras.preprocessing import sequence
-from tensorflow.keras.layers import Dense, Activation, Embedding, Dropout, Input, LSTM, Reshape, Lambda, RepeatVector
+from keras import backend as K
+from keras import Model
+from keras.models import Sequential
+from keras.preprocessing import sequence
+from keras.layers import Dense, Activation, Embedding, Dropout, Input, LSTM, Reshape, Lambda, RepeatVector
 
-from tensorflow.keras.optimizers import Adam
+from keras.optimizers import Adam
 import streamlit as st
 from PIL import Image
-from tensorflow.keras.utils import to_categorical
+from keras.utils import to_categorical
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import confusion_matrix,classification_report
 from networkx.generators.random_graphs import fast_gnp_random_graph as nxf
@@ -27,13 +27,20 @@ st.set_page_config(
     page_icon="😎",
     layout="wide"
 )
-'''
-# Projet d'unsupervised Learning
-'''
-"## Ibrahim COULIBALY "
-"## M2 Data Science"
-"## Université Paris Saclay"
-
+st.markdown(
+    """<h1 style='text-align: center; background-color: #2D3E50; color: #FFFFFF'>
+    Projet d'unsupervised Learning
+    </h1>""",
+    unsafe_allow_html=True,
+)
+st.markdown(
+    """<h2 style='text-align: center; background-color: #2D3E50; color: #FFFFFF'>
+Ibrahim COULIBALY
+M2 Data Science
+Université Paris Saclay
+</h1>""",
+    unsafe_allow_html=True,
+)
 image = Image.open('unsupervised.jpeg')
 st.image(image)
 """
