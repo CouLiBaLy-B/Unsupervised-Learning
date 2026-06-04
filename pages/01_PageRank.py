@@ -139,7 +139,7 @@ fig_conv = px.line(
     y=df_cum.columns,
     title="Convergence des Probabilités",
 )
-st.plotly_chart(fig_conv, width='stretch')
+st.plotly_chart(fig_conv, width="stretch")
 
 # ---- Compare Methods ----
 st.subheader("Comparaison entre les deux probabilités stationnaires")
