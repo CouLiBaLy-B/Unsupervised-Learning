@@ -1,0 +1,38 @@
+[tool.ruff]
+target-version = "py310"
+line-length = 100
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "N", "UP", "B", "SIM", "C4"]
+ignore = ["E501", "B008", "N802", "N803", "N806", "UP006", "UP035"]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/*" = ["S101"]
+"pages/*" = ["E402"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]
+addopts = "-v --tb=short"
+
+[tool.coverage.run]
+source = ["src"]
+omit = [
+    "*/__pycache__/*",
+    "*/tests/*",
+    "src/markv.py",
+    "src/pagerank.py",
+    "src/home.py",
+]
+
+[tool.coverage.report]
+exclude_lines = [
+    "pragma: no cover",
+    "if __name__ == .__main__.:",
+    "raise NotImplementedError",
+    "st\\.",
+    "plt\\.",
+    "px\\.",
+]
+fail_under = 80
+show_missing = true
