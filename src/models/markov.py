@@ -17,7 +17,7 @@ class MarkovModel:
         states: List of hidden state names
         observations: List of observable state names
         transition_matrix: State transition probabilities (n_states x n_states)
-        emission_matrix: Observation emission probabilities (n_observations x n_states)
+        emission_matrix: Observation emission probabilities (n_states x n_observations)
     """
 
     def __init__(
@@ -30,7 +30,11 @@ class MarkovModel:
         self.states = states
         self.observations = observations
         self.transition_matrix = transition_matrix
-        self.emission_matrix = emission_matrix
+        # Ensure emission_matrix is (n_states x n_observations)
+        if emission_matrix.shape[0] != len(states):
+            self.emission_matrix = emission_matrix.T
+        else:
+            self.emission_matrix = emission_matrix
         self.observation_pairs = self._generate_observation_pairs()
         self.joint_emission_matrix = self._generate_joint_emission_matrix()
 
@@ -48,14 +52,18 @@ class MarkovModel:
 
         Assumes independence between the two observation words
         given the hidden state.
+
+        Returns:
+            Joint emission matrix of shape (n_states, n_pairs)
         """
+        n_states = self.transition_matrix.shape[0]
+        n_obs = self.emission_matrix.shape[1]
         num_pairs = len(self.observation_pairs)
-        num_states = self.transition_matrix.shape[0]
-        joint_matrix = np.zeros((num_states, num_pairs))
+        joint_matrix = np.zeros((n_states, num_pairs))
 
         pair_index = 0
-        for i in range(self.emission_matrix.shape[0]):
-            for j in range(i, self.emission_matrix.shape[1]):
+        for i in range(n_obs):
+            for j in range(i, n_obs):
                 if i != j:
                     joint_matrix[:, pair_index] = (
                         2 * self.emission_matrix[:, i] * self.emission_matrix[:, j]
@@ -455,7 +463,8 @@ class WebCommunitySimulator:
         eps = 1.0 / epsilon
         A1 = (self.adjacency_matrix + eps) / (
             np.sum(self.adjacency_matrix, axis=1) + self.n_nodes * eps
-        )
+        )[:, None]
+        A1 = np.nan_to_num(A1)
         A2 = np.ones((self.n_nodes, self.n_nodes)) / self.n_nodes
 
         return A1, A2
@@ -463,14 +472,14 @@ class WebCommunitySimulator:
     def simulate_random_walk(
         self,
         transition_matrix: np.ndarray,
-        observation_words: List[Tuple[str, str]],
+        observation_words: List[str],
         n_steps: int = 500,
-    ) -> Tuple[List[Tuple[str, str]], List[float]]:
+    ) -> Tuple[List[str], List[float]]:
         """Simulate a random walk on the community graph.
 
         Args:
             transition_matrix: Transition probabilities
-            observation_words: Available observation word pairs
+            observation_words: Available observation words
             n_steps: Number of walk steps
 
         Returns:
@@ -479,15 +488,17 @@ class WebCommunitySimulator:
         n_states = transition_matrix.shape[0]
         current_state = np.random.choice(n_states)
 
-        observations = [observation_words[current_state]]
-        positions = [current_state / (n_states - 1)]
+        observations = [observation_words[current_state % len(observation_words)]]
+        positions = [current_state / max(n_states - 1, 1)]
 
         for _ in range(n_steps - 1):
             current_state = np.random.choice(
                 n_states,
                 p=transition_matrix[current_state],
             )
-            observations.append(observation_words[current_state])
-            positions.append(current_state / (n_states - 1))
+            observations.append(
+                observation_words[current_state % len(observation_words)]
+            )
+            positions.append(current_state / max(n_states - 1, 1))
 
         return observations, positions

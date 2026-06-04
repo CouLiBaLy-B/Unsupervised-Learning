@@ -1,15 +1,16 @@
 """Streamlit page - Classifier (MLP) Training."""
 
+import numpy as np
 import matplotlib.pyplot as plt
 import streamlit as st
 
 from src.ml.classifier import (
     MultiLayerPerceptron,
-    accuracy,
-    binary_cross_entropy,
-    prepare_data,
-    split_into_batches,
     standardize,
+    prepare_data,
+    binary_cross_entropy,
+    accuracy,
+    split_into_batches,
 )
 from src.models.markov import WebCommunitySimulator
 
@@ -28,13 +29,15 @@ st.markdown(
 
 def main() -> None:
     """Run the MLP classifier training app."""
-    st.write("""Utiliser un modèle de classification basé sur du deep learning.
+    st.write(
+        """Utiliser un modèle de classification basé sur du deep learning.
 
         Le principe est le suivant :
         - Découper la chaîne en batch de petite taille (segments de longueur définie)
         - À chaque batch on associe un label (0 ou 1) en fonction de la chaîne de provenance
         - Entraîner un modèle Perceptron Multicouche (MLP) avec descente de gradient et momentum
-        """)
+        """
+    )
 
     # ---- Sidebar Parameters ----
     st.sidebar.header("Paramètres MLP")
@@ -73,26 +76,19 @@ def main() -> None:
                 alpha=alpha_sbm,
                 beta=beta_sbm,
             )
-            hidden_states, _ = sbm.simulate()
+            sbm.simulate()
             A1, A2 = sbm.compute_transition_matrices(1000)
 
-            walk1, _ = sbm.simulate_random_walk(
-                transition_matrix=A1,
-                observation_words=["placeholder"] * n_nodes_sbm,
-                n_steps=500,
-            )
-            walk2, _ = sbm.simulate_random_walk(
-                transition_matrix=A2,
-                observation_words=["placeholder"] * n_nodes_sbm,
-                n_steps=500,
-            )
+            # Generate simple label arrays for ML training
+            walk1_labels = [0] * (n_nodes_sbm * 5)
+            walk2_labels = [1] * (n_nodes_sbm * 5)
 
-            # Encode walks as integers for ML
-            X_encoded, y_encoded = split_into_batches(
-                sequence_1=[0] * len(walk1),
-                sequence_2=[1] * len(walk2),
-                batch_size=batch_size,
-            )
+        # Encode walks as integers for ML
+        X_encoded, y_encoded = split_into_batches(
+            sequence_1=walk1_labels,
+            sequence_2=walk2_labels,
+            batch_size=batch_size,
+        )
 
         # Standardize and split
         X = standardize(X_encoded.astype(float))
@@ -123,7 +119,9 @@ def main() -> None:
                 for epoch in range(n_epochs):
                     # Forward
                     y_train_pred = mlp.forward(X_train)
-                    train_cost.append(binary_cross_entropy(y_train_pred, y_train))
+                    train_cost.append(
+                        binary_cross_entropy(y_train_pred, y_train)
+                    )
                     train_acc.append(accuracy(y_train_pred, y_train))
 
                     # Backward

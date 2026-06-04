@@ -5,18 +5,18 @@ import pandas as pd
 import streamlit as st
 
 from src.models.markov import (
-    BaumWelch,
-    HiddenMarkovChain,
     MarkovModel,
+    HiddenMarkovChain,
+    BaumWelch,
     Viterbi,
 )
 from src.utils.config import (
     DEFAULT_DOMAINS,
+    DEFAULT_KEYWORDS,
+    DEFAULT_TRANSITION_MATRIX,
     DEFAULT_EMISSION_MATRIX,
     DEFAULT_HMM_SIMULATION_LENGTH,
     DEFAULT_HMM_SIMULATION_WIDTH,
-    DEFAULT_KEYWORDS,
-    DEFAULT_TRANSITION_MATRIX,
 )
 
 st.set_page_config(
@@ -34,9 +34,11 @@ st.markdown(
 
 def main() -> None:
     """Run the HMM web communication simulation app."""
-    st.write("""Dans cette section, nous simulons un parcours web à l'aide d'une chaîne
+    st.write(
+        """Dans cette section, nous simulons un parcours web à l'aide d'une chaîne
         de Markov cachée (HMM) dont les paramètres sont les états cachés (domaines)
-        et les observations (mots clés).""")
+        et les observations (mots clés)."""
+    )
 
     # ---- Sidebar Parameters ----
     st.sidebar.header("Paramètres HMM")
@@ -63,7 +65,8 @@ def main() -> None:
     domaines = DEFAULT_DOMAINS
     mots = DEFAULT_KEYWORDS
     A = np.array(DEFAULT_TRANSITION_MATRIX, dtype=float)
-    B = np.array(DEFAULT_EMISSION_MATRIX, dtype=float).T
+    # Emission matrix: (n_states, n_observations) = (3, 10)
+    B = np.array(DEFAULT_EMISSION_MATRIX, dtype=float)
 
     st.subheader("États cachés (Domaines)")
     st.dataframe(pd.DataFrame(domaines, columns=["Domaine"]))
@@ -75,7 +78,7 @@ def main() -> None:
     st.dataframe(pd.DataFrame(mots, columns=["Mot clé"]))
 
     st.subheader("Matrice d'émission B")
-    st.dataframe(pd.DataFrame(B, index=mots, columns=domaines))
+    st.dataframe(pd.DataFrame(B, index=domaines, columns=mots))
 
     # ---- Initialize Markov Model ----
     markov_model = MarkovModel(
@@ -87,12 +90,14 @@ def main() -> None:
 
     # ---- Joint Emission Matrix ----
     st.subheader("Matrice de probabilité jointe D")
-    st.write("""Pour la simulation à double mots clés, nous déterminons la matrice
+    st.write(
+        """Pour la simulation à double mots clés, nous déterminons la matrice
         des probabilités pour des couples de mots clés, sous condition d'indépendance
         des deux mots clés par rapport au domaine :
 
         $D_{i,j} = P(X_j = W1, Y_j = W2 | Dom_i) = P(X_j = W1 | Dom_i) \\times P(Y_j = W2 | Dom_i)$
-        """)
+        """
+    )
 
     keyword_pairs = markov_model.observation_pairs
     joint_matrix = markov_model.joint_emission_matrix
@@ -168,9 +173,11 @@ def main() -> None:
 
         # ---- Viterbi Decoding ----
         st.subheader("Générateur des états cachés avec Viterbi")
-        st.write("""L'algorithme de Viterbi est une solution optimale au sens du maximum
+        st.write(
+            """L'algorithme de Viterbi est une solution optimale au sens du maximum
             de vraisemblance pour l'estimation d'une séquence d'états d'un processus
-            de Markov à temps discret et nombre d'états finis.""")
+            de Markov à temps discret et nombre d'états finis."""
+        )
 
         with st.spinner("Viterbi en cours..."):
             decoded = Viterbi.decode(

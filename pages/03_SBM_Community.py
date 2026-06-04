@@ -7,9 +7,11 @@ import streamlit as st
 from src.models.markov import MarkovModel, WebCommunitySimulator
 from src.utils.config import (
     DEFAULT_DOMAINS,
-    DEFAULT_EMISSION_MATRIX,
     DEFAULT_KEYWORDS,
+    DEFAULT_EMISSION_MATRIX,
     DEFAULT_SBM_SIZE,
+    DEFAULT_SBM_ALPHA,
+    DEFAULT_SBM_BETA,
 )
 
 st.set_page_config(
@@ -27,7 +29,8 @@ st.markdown(
 
 def main() -> None:
     """Run the SBM community simulation app."""
-    st.write("""Supposons qu'un ensemble de pages web soit partagé en groupes selon un
+    st.write(
+        """Supposons qu'un ensemble de pages web soit partagé en groupes selon un
         processus stochastique :
 
         - Les pages traitant de sport (z = S)
@@ -36,7 +39,8 @@ def main() -> None:
 
         Avec $X_{ij} | z_i=k, z_j=l \\sim B(\\alpha I_{(k=l)} + \\beta I_{(k \\neq l)})$
         et $P(z_i = k) = \\pi_k = 1/3$.
-        """)
+        """
+    )
 
     # ---- Sidebar Parameters ----
     st.sidebar.header("Paramètres SBM")
@@ -46,8 +50,12 @@ def main() -> None:
         max_value=1000,
         value=DEFAULT_SBM_SIZE,
     )
-    alpha = st.sidebar.slider("Alpha (intra-communauté)", 0.01, 0.50, 0.15)
-    beta = st.sidebar.slider("Beta (inter-communauté)", 0.01, 0.50, 0.05)
+    alpha = st.sidebar.slider(
+        "Alpha (intra-communauté)", 0.01, 0.50, DEFAULT_SBM_ALPHA, key="alpha_sbm_slider"
+    )
+    beta = st.sidebar.slider(
+        "Beta (inter-communauté)", 0.01, 0.50, DEFAULT_SBM_BETA, key="beta_sbm_slider"
+    )
     epsilon_val = st.sidebar.number_input(
         "Epsilon (lissage = 1/n)",
         min_value=100,
@@ -72,7 +80,7 @@ def main() -> None:
                 [0.1, 0.1, 0.8],
             ]
         ),
-        emission_matrix=np.array(DEFAULT_EMISSION_MATRIX).T,
+        emission_matrix=np.array(DEFAULT_EMISSION_MATRIX),
     )
 
     simulator = WebCommunitySimulator(
