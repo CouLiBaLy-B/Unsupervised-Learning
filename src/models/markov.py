@@ -409,7 +409,7 @@ class WebCommunitySimulator:
 
         # Generate adjacency matrix (vectorized)
         # Build probability matrix: alpha on diagonal blocks, beta elsewhere
-        same_community = (hidden_states[:, None] == hidden_states[None, :])
+        same_community = hidden_states[:, None] == hidden_states[None, :]
         prob_matrix = np.where(same_community, self.alpha, self.beta)
         np.fill_diagonal(prob_matrix, 0.0)  # no self-loops
         adjacency = np.random.binomial(1, prob_matrix).astype(float)
