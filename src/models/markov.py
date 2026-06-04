@@ -31,10 +31,17 @@ class MarkovModel:
         self.observations = observations
         self.transition_matrix = transition_matrix
         # Ensure emission_matrix is (n_states x n_observations)
-        if emission_matrix.shape[0] != len(states):
-            self.emission_matrix = emission_matrix.T
+        n_states = len(states)
+        n_obs = len(observations)
+        if emission_matrix.shape == (n_states, n_obs):
+            self.emission_matrix = emission_matrix.copy()
+        elif emission_matrix.shape == (n_obs, n_states):
+            self.emission_matrix = emission_matrix.T.copy()
         else:
-            self.emission_matrix = emission_matrix
+            raise ValueError(
+                f"Emission matrix shape {emission_matrix.shape} doesn't match "
+                f"expected ({n_states}, {n_obs}) or ({n_obs}, {n_states})"
+            )
         self.observation_pairs = self._generate_observation_pairs()
         self.joint_emission_matrix = self._generate_joint_emission_matrix()
 
@@ -56,7 +63,7 @@ class MarkovModel:
         Returns:
             Joint emission matrix of shape (n_states, n_pairs)
         """
-        n_states = self.transition_matrix.shape[0]
+        n_states = self.emission_matrix.shape[0]
         n_obs = self.emission_matrix.shape[1]
         num_pairs = len(self.observation_pairs)
         joint_matrix = np.zeros((n_states, num_pairs))
@@ -66,7 +73,9 @@ class MarkovModel:
             for j in range(i, n_obs):
                 if i != j:
                     joint_matrix[:, pair_index] = (
-                        2 * self.emission_matrix[:, i] * self.emission_matrix[:, j]
+                        2.0
+                        * self.emission_matrix[:, i]
+                        * self.emission_matrix[:, j]
                     )
                 else:
                     joint_matrix[:, pair_index] = (
@@ -296,8 +305,8 @@ class BaumWelch:
             )
 
         return {
-            "transition_matrix": self.transition_matrix,
-            "em_matrix": self.emission_matrix,
+            "a": self.transition_matrix,
+            "b": self.emission_matrix,
         }
 
 
@@ -417,7 +426,7 @@ class WebCommunitySimulator:
         self,
         observation_pairs: List[Tuple[str, str]],
         emission_matrix: np.ndarray,
-    ) -> List[Tuple[str, str]]:
+    ) -> List[str]:
         """Generate observable words from hidden community states.
 
         Args:
@@ -425,7 +434,7 @@ class WebCommunitySimulator:
             emission_matrix: Joint emission probabilities
 
         Returns:
-            List of observed word pairs
+            List of observed word strings
         """
         if self.hidden_states is None:
             raise ValueError("Call simulate() first.")
@@ -438,7 +447,9 @@ class WebCommunitySimulator:
                 n_emission_categories,
                 p=emission_matrix[int(state) - 1],
             )
-            observations.append(observation_pairs[obs_idx])
+            # Return the pair as a string representation
+            pair = observation_pairs[obs_idx]
+            observations.append(f"{pair[0]}-{pair[1]}")
 
         return observations
 
@@ -486,9 +497,10 @@ class WebCommunitySimulator:
             Tuple of (walk_observations, normalized_positions)
         """
         n_states = transition_matrix.shape[0]
+        n_obs_words = len(observation_words)
         current_state = np.random.choice(n_states)
 
-        observations = [observation_words[current_state % len(observation_words)]]
+        observations = [observation_words[current_state % n_obs_words]]
         positions = [current_state / max(n_states - 1, 1)]
 
         for _ in range(n_steps - 1):
@@ -497,7 +509,7 @@ class WebCommunitySimulator:
                 p=transition_matrix[current_state],
             )
             observations.append(
-                observation_words[current_state % len(observation_words)]
+                observation_words[current_state % n_obs_words]
             )
             positions.append(current_state / max(n_states - 1, 1))
 
