@@ -14,8 +14,12 @@ from sklearn.model_selection import train_test_split
 
 
 def sigmoid(x: np.ndarray) -> np.ndarray:
-    """Sigmoid activation function."""
-    return 1.0 / (1.0 + np.exp(-x))
+    """Sigmoid activation function (numerically stable)."""
+    return np.where(
+        x >= 0,
+        1.0 / (1.0 + np.exp(-x)),
+        np.exp(x) / (1.0 + np.exp(x)),
+    )
 
 
 def relu(x: np.ndarray) -> np.ndarray:

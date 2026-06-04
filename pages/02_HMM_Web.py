@@ -127,22 +127,13 @@ def main() -> None:
         # ---- Baum-Welch Estimation ----
         st.subheader("Estimation des paramètres avec Baum-Welch")
 
-        # Recode results into integer indices
+        # Recode results into integer indices (vectorized per column)
+        state_to_idx = {s: i for i, s in enumerate(domaines)}
+        pair_to_idx = {p: i for i, p in enumerate(keyword_pairs)}
         mat_encoded = results.copy()
-        for i in range(mat_encoded.shape[0]):
-            for j in range(0, mat_encoded.shape[1], 2):
-                state_val = mat_encoded.iloc[i, j]
-                obs_val = mat_encoded.iloc[i, j + 1]
-
-                if isinstance(state_val, str):
-                    mat_encoded.iloc[i, j] = domaines.index(state_val)
-                else:
-                    mat_encoded.iloc[i, j] = int(state_val)
-
-                if isinstance(obs_val, str):
-                    mat_encoded.iloc[i, j + 1] = keyword_pairs.index(obs_val)
-                else:
-                    mat_encoded.iloc[i, j + 1] = int(obs_val)
+        for j in range(0, mat_encoded.shape[1], 2):
+            mat_encoded.iloc[:, j] = mat_encoded.iloc[:, j].map(state_to_idx)
+            mat_encoded.iloc[:, j + 1] = mat_encoded.iloc[:, j + 1].map(pair_to_idx)
 
         if st.checkbox("Afficher la matrice recodée", value=False):
             st.dataframe(mat_encoded)

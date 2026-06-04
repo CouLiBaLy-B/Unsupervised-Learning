@@ -106,13 +106,14 @@ class TestBaumWelch:
 
     def test_forward(self, bw):
         """Test forward algorithm output shape."""
-        alpha = bw._forward()
+        alpha, c = bw._forward()
         assert alpha.shape == (len(bw.observations), bw.transition_matrix.shape[0])
         assert np.all(alpha >= 0)
 
     def test_backward(self, bw):
         """Test backward algorithm output shape."""
-        beta = bw._backward()
+        _, c = bw._forward()
+        beta = bw._backward(c)
         assert beta.shape == (len(bw.observations), bw.transition_matrix.shape[0])
         assert np.all(beta > 0)
 

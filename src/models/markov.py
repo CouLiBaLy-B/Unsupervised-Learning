@@ -263,33 +263,35 @@ class BaumWelch:
             alpha, c = self._forward()
             beta = self._backward(c)
 
-            # Vectorized computation of xi (joint state probabilities)
+            # Fully vectorized computation of xi (joint state probabilities)
             # xi shape: (T-1, M, M)
             # xi[t, i, j] = alpha[t, i] * A[i, j] * B[j, o_{t+1}] * beta[t+1, j]
-
-            xi = np.zeros((T - 1, M, M))
-            for t in range(T - 1):
-                num = (
-                    alpha[t][:, None]
-                    * self.transition_matrix
-                    * self.emission_matrix[:, self.observations[t + 1]]
-                    * beta[t + 1]
-                )
-                xi[t] = num / (np.sum(num) + 1e-15)
+            obs_next = self.observations[1:]  # shape (T-1,)
+            # alpha[:-1]: (T-1, M) → (T-1, M, 1)
+            # self.transition_matrix: (M, M)
+            # self.emission_matrix[:, obs_next]: (M, T-1) → (T-1, M) for broadcast as (T-1, 1, M)
+            # beta[1:]: (T-1, M) → (T-1, 1, M)
+            num_xi = (
+                alpha[:-1, :, None]
+                * self.transition_matrix[None, :, :]
+                * self.emission_matrix[:, obs_next].T[:, None, :]
+                * beta[1:, None, :]
+            )  # shape (T-1, M, M)
+            denom_xi = num_xi.sum(axis=(1, 2), keepdims=True) + 1e-15
+            xi = num_xi / denom_xi
 
             # Compute gamma (marginal state probabilities)
             # gamma shape: (T, M)
             gamma = np.zeros((T, M))
             gamma[: T - 1] = np.sum(xi, axis=2)
-            # Last gamma: gamma[T-1, i] = alpha[T-1, i] / sum(alpha[T-1])
-            # Since alpha is already scaled, we just normalize it.
+            # Last gamma: normalize the already-scaled alpha[T-1]
             gamma[T - 1] = alpha[T - 1] / (np.sum(alpha[T - 1]) + 1e-15)
 
             # Update transition matrix A
             # A[i, j] = sum_t(xi[t, i, j]) / sum_t(gamma[t, i])
             num_a = np.sum(xi, axis=0)
             den_a = np.sum(gamma[: T - 1], axis=0)[:, None]
-            self.transition_matrix = np.around(num_a / (den_a + 1e-15), 4)
+            self.transition_matrix = num_a / (den_a + 1e-15)
 
             # Update emission matrix B
             # B[i, k] = sum_{t: o_t=k}(gamma[t, i]) / sum_t(gamma[t, i])
@@ -298,11 +300,11 @@ class BaumWelch:
                 num_b[:, k] = np.sum(gamma[self.observations == k], axis=0)
 
             den_b = np.sum(gamma, axis=0)[:, None]
-            self.emission_matrix = np.around(num_b / (den_b + 1e-15), 4)
+            self.emission_matrix = num_b / (den_b + 1e-15)
 
         return {
-            "a": self.transition_matrix,
-            "b": self.emission_matrix,
+            "a": np.around(self.transition_matrix, 4),
+            "b": np.around(self.emission_matrix, 4),
         }
 
 
@@ -405,14 +407,12 @@ class WebCommunitySimulator:
             ]
         )
 
-        # Generate adjacency matrix
-        adjacency = np.zeros((self.n_nodes, self.n_nodes))
-        for i in range(self.n_nodes):
-            for j in range(self.n_nodes):
-                if i == j:
-                    continue
-                p = self.alpha if hidden_states[i] == hidden_states[j] else self.beta
-                adjacency[i, j] = np.random.binomial(1, p)
+        # Generate adjacency matrix (vectorized)
+        # Build probability matrix: alpha on diagonal blocks, beta elsewhere
+        same_community = (hidden_states[:, None] == hidden_states[None, :])
+        prob_matrix = np.where(same_community, self.alpha, self.beta)
+        np.fill_diagonal(prob_matrix, 0.0)  # no self-loops
+        adjacency = np.random.binomial(1, prob_matrix).astype(float)
 
         self.hidden_states = hidden_states
         self.adjacency_matrix = adjacency
@@ -451,15 +451,16 @@ class WebCommunitySimulator:
 
     def compute_transition_matrices(
         self,
-        epsilon: float = 0.001,
+        inv_epsilon: float = 1000,
     ) -> Tuple[np.ndarray, np.ndarray]:
         """Compute two transition matrices for the community simulation.
 
-        A1: Normalized adjacency with epsilon smoothing
+        A1: Normalized adjacency with additive smoothing (Laplace-like)
         A2: Uniform transition matrix
 
         Args:
-            epsilon: Smoothing parameter (1/epsilon value)
+            inv_epsilon: Smoothing intensity (higher = more smoothing; equivalent
+                to the former ``1 / epsilon`` parameterization). Default: 1000.
 
         Returns:
             Tuple of (A1, A2) matrices
@@ -467,7 +468,7 @@ class WebCommunitySimulator:
         if self.adjacency_matrix is None:
             raise ValueError("Call simulate() first.")
 
-        eps = 1.0 / epsilon
+        eps = inv_epsilon
         A1 = (self.adjacency_matrix + eps) / (
             np.sum(self.adjacency_matrix, axis=1) + self.n_nodes * eps
         )[:, None]
@@ -486,21 +487,28 @@ class WebCommunitySimulator:
         """Simulate a random walk on the community graph.
 
         Args:
-            transition_matrix: Transition probabilities
-            emission_matrix: Joint emission probabilities
+            transition_matrix: Transition probabilities (n_nodes x n_nodes)
+            emission_matrix: Joint emission probabilities (n_communities x n_pairs)
             observation_pairs: Available observation pairs
             n_steps: Number of walk steps
 
         Returns:
             Tuple of (walk_observations, normalized_positions)
         """
+        if self.hidden_states is None:
+            raise ValueError("Call simulate() first.")
+
         n_states = transition_matrix.shape[0]
+        n_communities = emission_matrix.shape[0]
         current_state = np.random.choice(n_states)
 
-        # Sample first observation based on current state
-        obs_idx = np.random.choice(
-            emission_matrix.shape[1], p=emission_matrix[current_state]
-        )
+        def _community(node: int) -> int:
+            """Map node index to 0-based community index."""
+            return int(self.hidden_states[node]) - 1
+
+        # Sample first observation based on the community of the current node
+        community = _community(current_state)
+        obs_idx = np.random.choice(n_communities, p=emission_matrix[community])
         pair = observation_pairs[obs_idx]
 
         observations = [f"{pair[0]}-{pair[1]}"]
@@ -511,9 +519,8 @@ class WebCommunitySimulator:
                 n_states,
                 p=transition_matrix[current_state],
             )
-            obs_idx = np.random.choice(
-                emission_matrix.shape[1], p=emission_matrix[current_state]
-            )
+            community = _community(current_state)
+            obs_idx = np.random.choice(n_communities, p=emission_matrix[community])
             pair = observation_pairs[obs_idx]
             observations.append(f"{pair[0]}-{pair[1]}")
             positions.append(current_state / max(n_states - 1, 1))
