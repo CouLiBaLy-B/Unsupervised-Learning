@@ -1,16 +1,15 @@
 """Streamlit page - Classifier (MLP) Training."""
 
-import numpy as np
 import matplotlib.pyplot as plt
 import streamlit as st
 
 from src.ml.classifier import (
     MultiLayerPerceptron,
-    standardize,
-    prepare_data,
-    binary_cross_entropy,
     accuracy,
+    binary_cross_entropy,
+    prepare_data,
     split_into_batches,
+    standardize,
 )
 from src.models.markov import WebCommunitySimulator
 

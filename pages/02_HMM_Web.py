@@ -5,18 +5,18 @@ import pandas as pd
 import streamlit as st
 
 from src.models.markov import (
-    MarkovModel,
-    HiddenMarkovChain,
     BaumWelch,
+    HiddenMarkovChain,
+    MarkovModel,
     Viterbi,
 )
 from src.utils.config import (
     DEFAULT_DOMAINS,
-    DEFAULT_KEYWORDS,
-    DEFAULT_TRANSITION_MATRIX,
     DEFAULT_EMISSION_MATRIX,
     DEFAULT_HMM_SIMULATION_LENGTH,
     DEFAULT_HMM_SIMULATION_WIDTH,
+    DEFAULT_KEYWORDS,
+    DEFAULT_TRANSITION_MATRIX,
 )
 
 st.set_page_config(

@@ -7,11 +7,11 @@ import streamlit as st
 from src.models.markov import MarkovModel, WebCommunitySimulator
 from src.utils.config import (
     DEFAULT_DOMAINS,
-    DEFAULT_KEYWORDS,
     DEFAULT_EMISSION_MATRIX,
-    DEFAULT_SBM_SIZE,
+    DEFAULT_KEYWORDS,
     DEFAULT_SBM_ALPHA,
     DEFAULT_SBM_BETA,
+    DEFAULT_SBM_SIZE,
 )
 
 st.set_page_config(

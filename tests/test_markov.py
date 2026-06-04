@@ -119,10 +119,10 @@ class TestBaumWelch:
     def test_estimate_returns_matrices(self, bw):
         """Test that estimate returns both matrices."""
         result = bw.estimate()
-        assert "transition_matrix" in result
-        assert "em_matrix" in result
-        assert result["transition_matrix"].shape == bw.transition_matrix.shape
-        assert result["em_matrix"].shape == bw.emission_matrix.shape
+        assert "a" in result
+        assert "b" in result
+        assert result["a"].shape == bw.transition_matrix.shape
+        assert result["b"].shape == bw.emission_matrix.shape
 
 
 class TestViterbi:
