@@ -78,11 +78,11 @@ class PageRankSimulator:
         self.adjacency_matrix = np.array(mat.todense(), dtype=int)
         return self.adjacency_matrix
 
-    def compute_transition_matrix(self, epsilon: float = 0.05) -> np.ndarray:
-        """Compute the transition matrix with epsilon smoothing.
+    def compute_transition_matrix(self, alpha: float = 0.85) -> np.ndarray:
+        """Compute the transition matrix using the PageRank damping factor.
 
         Args:
-            epsilon: Smoothing parameter (default: 0.05)
+            alpha: Damping factor (default: 0.85)
 
         Returns:
             Transition matrix as numpy array
@@ -90,36 +90,41 @@ class PageRankSimulator:
         if self.adjacency_matrix is None:
             self.compute_adjacency_matrix()
 
-        adj_df = pd.DataFrame(self.adjacency_matrix)
-        diag_epsilon = np.diag([epsilon] * self.num_nodes)
+        n = self.num_nodes
+        # Initialize P as the normalized adjacency matrix
+        P = self.adjacency_matrix.astype(float)
+        row_sums = P.sum(axis=1)
 
-        # Compute the raw transition matrix
-        raw_transition = adj_df.apply(
-            lambda row: (row - epsilon) / row.sum() if row.sum() > 0 else 0,
-            axis=1,
-        )
-        raw_transition[raw_transition < 0] = 0
+        # Handle dangling nodes (rows with all zeros) by distributing probability uniformly
+        # For other nodes, normalize the row
+        for i in range(n):
+            if row_sums[i] == 0:
+                P[i, :] = 1.0 / n
+            else:
+                P[i, :] /= row_sums[i]
 
-        # Add epsilon smoothing to diagonal
-        self.transition_matrix = np.array(diag_epsilon) + np.array(raw_transition)
+        # Google Matrix M = alpha * P + (1 - alpha) * (1/n * ones_matrix)
+        ones_matrix = np.ones((n, n)) / n
+        self.transition_matrix = alpha * P + (1 - alpha) * ones_matrix
+        
         return self.transition_matrix
 
     def compute_stationary_probability(
         self,
         power: int = 1000,
-        epsilon: float = 0.05,
+        alpha: float = 0.85,
     ) -> pd.Series:
         """Compute stationary probability using matrix power iteration.
 
         Args:
             power: Number of iterations (default: 1000)
-            epsilon: Smoothing parameter (default: 0.05)
+            alpha: Damping factor (default: 0.85)
 
         Returns:
             Stationary probabilities as pandas Series
         """
         if self.transition_matrix is None:
-            self.compute_transition_matrix(epsilon)
+            self.compute_transition_matrix(alpha)
 
         transition_power = np.linalg.matrix_power(self.transition_matrix, power)
         stationary = transition_power[0]  # First row converges to stationary dist

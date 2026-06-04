@@ -29,10 +29,10 @@ class TestPageRankSimulator:
         assert np.all((adj >= 0) & (adj <= 1))
 
     def test_compute_transition_matrix(self, simulator):
-        """Test transition matrix computation with epsilon smoothing."""
+        """Test transition matrix computation with damping factor."""
         simulator.generate_graph()
         simulator.compute_adjacency_matrix()
-        trans = simulator.compute_transition_matrix(epsilon=0.05)
+        trans = simulator.compute_transition_matrix(alpha=0.85)
 
         assert trans.shape == (5, 5)
         # Rows should sum to approximately 1 (stochastic)
@@ -43,9 +43,9 @@ class TestPageRankSimulator:
         """Test stationary probability computation."""
         simulator.generate_graph()
         simulator.compute_adjacency_matrix()
-        simulator.compute_transition_matrix(epsilon=0.05)
+        simulator.compute_transition_matrix(alpha=0.85)
 
-        stat = simulator.compute_stationary_probability(power=1000, epsilon=0.05)
+        stat = simulator.compute_stationary_probability(power=1000, alpha=0.85)
         assert len(stat) == 5
         # Probabilities should sum to approximately 1
         np.testing.assert_allclose(stat.sum(), 1.0, rtol=1e-5)
@@ -55,7 +55,7 @@ class TestPageRankSimulator:
         """Test Markov chain simulation."""
         simulator.generate_graph()
         simulator.compute_adjacency_matrix()
-        simulator.compute_transition_matrix(epsilon=0.05)
+        simulator.compute_transition_matrix(alpha=0.85)
 
         chain = simulator.simulate_markov_chain(length=100)
         assert len(chain) == 101  # initial state + 100 steps
@@ -65,7 +65,7 @@ class TestPageRankSimulator:
         """Test transition string format."""
         simulator.generate_graph()
         simulator.compute_adjacency_matrix()
-        simulator.compute_transition_matrix(epsilon=0.05)
+        simulator.compute_transition_matrix(alpha=0.85)
 
         trans_str = simulator.get_transition_string(length=50)
         assert " -> " in trans_str
@@ -86,8 +86,8 @@ class TestPageRankSimulator:
         # Different seeds should (very likely) produce different graphs
         assert not np.array_equal(adj1, adj2)
 
-    def test_transition_matrix_epsilon_effect(self):
-        """Test that different epsilon values produce different transition matrices."""
+    def test_transition_matrix_alpha_effect(self):
+        """Test that different alpha values produce different transition matrices."""
         sim1 = PageRankSimulator(num_nodes=5, edge_probability=0.5, seed=42)
         sim2 = PageRankSimulator(num_nodes=5, edge_probability=0.5, seed=42)
 
@@ -96,8 +96,8 @@ class TestPageRankSimulator:
         sim2.generate_graph()
         sim2.compute_adjacency_matrix()
 
-        trans1 = sim1.compute_transition_matrix(epsilon=0.01)
-        trans2 = sim2.compute_transition_matrix(epsilon=0.1)
+        trans1 = sim1.compute_transition_matrix(alpha=0.8)
+        trans2 = sim2.compute_transition_matrix(alpha=0.9)
 
         assert not np.array_equal(trans1, trans2)
 

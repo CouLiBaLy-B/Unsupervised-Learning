@@ -198,47 +198,49 @@ class BaumWelch:
         self.initial_distribution = initial_distribution.copy()
         self.n_iterations = n_iterations
 
-    def _forward(self) -> np.ndarray:
-        """Compute forward probabilities (alpha).
+    def _forward(self) -> Tuple[np.ndarray, np.ndarray]:
+        """Compute scaled forward probabilities (alpha).
 
         Returns:
-            Forward probability matrix (T x M)
+            Tuple of (scaled_alpha, scaling_factors)
         """
         T = len(self.observations)
         M = self.transition_matrix.shape[0]
         alpha = np.zeros((T, M))
+        c = np.zeros(T)
 
         # Initialization
-        alpha[0] = (
-            self.initial_distribution * self.emission_matrix[:, self.observations[0]]
-        )
+        alpha[0] = self.initial_distribution * self.emission_matrix[:, self.observations[0]]
+        c[0] = 1.0 / (np.sum(alpha[0]) + 1e-15)
+        alpha[0] *= c[0]
 
         # Induction
         for t in range(1, T):
-            for j in range(M):
-                alpha[t, j] = (
-                    alpha[t - 1].dot(self.transition_matrix[:, j])
-                    * self.emission_matrix[j, self.observations[t]]
-                )
+            alpha[t] = (alpha[t - 1] @ self.transition_matrix) * self.emission_matrix[:, self.observations[t]]
+            c[t] = 1.0 / (np.sum(alpha[t]) + 1e-15)
+            alpha[t] *= c[t]
 
-        return alpha
+        return alpha, c
 
-    def _backward(self) -> np.ndarray:
-        """Compute backward probabilities (beta).
+    def _backward(self, c: np.ndarray) -> np.ndarray:
+        """Compute scaled backward probabilities (beta).
+
+        Args:
+            c: Scaling factors from the forward pass
 
         Returns:
-            Backward probability matrix (T x M)
+            Scaled backward probability matrix (T x M)
         """
         T = len(self.observations)
         M = self.transition_matrix.shape[0]
-        beta = np.ones((T, M))
+        beta = np.zeros((T, M))
+
+        # Initialization
+        beta[T - 1] = c[T - 1]
 
         # Induction (backward in time)
         for t in range(T - 2, -1, -1):
-            for j in range(M):
-                beta[t, j] = (
-                    beta[t + 1] * self.emission_matrix[:, self.observations[t + 1]]
-                ).dot(self.transition_matrix[j, :])
+            beta[t] = (self.transition_matrix @ (self.emission_matrix[:, self.observations[t + 1]] * beta[t + 1])) * c[t]
 
         return beta
 
@@ -250,59 +252,44 @@ class BaumWelch:
         """
         M = self.transition_matrix.shape[0]
         T = len(self.observations)
+        K = self.emission_matrix.shape[1]
 
         for _ in range(self.n_iterations):
-            alpha = self._forward()
-            beta = self._backward()
+            alpha, c = self._forward()
+            beta = self._backward(c)
 
-            # Compute xi (joint state-observation probabilities)
-            xi = np.zeros((M, M, T - 1))
+            # Vectorized computation of xi (joint state probabilities)
+            # xi shape: (T-1, M, M)
+            # xi[t, i, j] = alpha[t, i] * A[i, j] * B[j, o_{t+1}] * beta[t+1, j]
+            
+            xi = np.zeros((T - 1, M, M))
             for t in range(T - 1):
-                denominator = (
-                    alpha[t].T
-                    @ self.transition_matrix
-                    * self.emission_matrix[:, self.observations[t + 1]].T
-                    @ beta[t + 1]
-                )
-                for i in range(M):
-                    numerator = (
-                        alpha[t, i]
-                        * self.transition_matrix[i]
-                        * self.emission_matrix[:, self.observations[t + 1]].T
-                        * beta[t + 1].T
-                    )
-                    if denominator != 0:
-                        xi[i, :, t] = numerator / denominator
+                num = (alpha[t][:, None] * self.transition_matrix * 
+                       self.emission_matrix[:, self.observations[t+1]] * beta[t+1])
+                xi[t] = num / (np.sum(num) + 1e-15)
 
             # Compute gamma (marginal state probabilities)
-            gamma = np.sum(xi, axis=1)
+            # gamma shape: (T, M)
+            gamma = np.zeros((T, M))
+            gamma[:T-1] = np.sum(xi, axis=2)
+            # Last gamma: gamma[T-1, i] = alpha[T-1, i] / sum(alpha[T-1])
+            # Since alpha is already scaled, we just normalize it.
+            gamma[T-1] = alpha[T-1] / (np.sum(alpha[T-1]) + 1e-15)
 
-            # Update transition matrix
-            self.transition_matrix = np.around(
-                np.sum(xi, axis=2) / np.sum(gamma, axis=1).reshape(-1, 1),
-                4,
-            )
+            # Update transition matrix A
+            # A[i, j] = sum_t(xi[t, i, j]) / sum_t(gamma[t, i])
+            num_a = np.sum(xi, axis=0)
+            den_a = np.sum(gamma[:T-1], axis=0)[:, None]
+            self.transition_matrix = np.around(num_a / (den_a + 1e-15), 4)
 
-            # Append last gamma
-            gamma = np.hstack((gamma, np.sum(xi[:, :, T - 2], axis=0).reshape(-1, 1)))
-
-            # Update emission matrix
-            K = self.emission_matrix.shape[1]
-            denominator = np.sum(gamma, axis=1)
+            # Update emission matrix B
+            # B[i, k] = sum_{t: o_t=k}(gamma[t, i]) / sum_t(gamma[t, i])
+            num_b = np.zeros((M, K))
             for k in range(K):
-                self.emission_matrix[:, k] = np.sum(
-                    gamma[:, self.observations == k], axis=1
-                )
-
-            self.emission_matrix = np.around(
-                np.divide(
-                    self.emission_matrix,
-                    denominator.reshape(-1, 1),
-                    out=np.zeros_like(self.emission_matrix),
-                    where=denominator.reshape(-1, 1) != 0,
-                ),
-                4,
-            )
+                num_b[:, k] = np.sum(gamma[self.observations == k], axis=0)
+            
+            den_b = np.sum(gamma, axis=0)[:, None]
+            self.emission_matrix = np.around(num_b / (den_b + 1e-15), 4)
 
         return {
             "a": self.transition_matrix,
@@ -483,24 +470,32 @@ class WebCommunitySimulator:
     def simulate_random_walk(
         self,
         transition_matrix: np.ndarray,
-        observation_words: List[str],
+        emission_matrix: np.ndarray,
+        observation_pairs: List[Tuple[str, str]],
         n_steps: int = 500,
     ) -> Tuple[List[str], List[float]]:
         """Simulate a random walk on the community graph.
 
         Args:
             transition_matrix: Transition probabilities
-            observation_words: Available observation words
+            emission_matrix: Joint emission probabilities
+            observation_pairs: Available observation pairs
             n_steps: Number of walk steps
 
         Returns:
             Tuple of (walk_observations, normalized_positions)
         """
         n_states = transition_matrix.shape[0]
-        n_obs_words = len(observation_words)
         current_state = np.random.choice(n_states)
 
-        observations = [observation_words[current_state % n_obs_words]]
+        # Sample first observation based on current state
+        obs_idx = np.random.choice(
+            emission_matrix.shape[1], 
+            p=emission_matrix[current_state]
+        )
+        pair = observation_pairs[obs_idx]
+        
+        observations = [f"{pair[0]}-{pair[1]}"]
         positions = [current_state / max(n_states - 1, 1)]
 
         for _ in range(n_steps - 1):
@@ -508,9 +503,12 @@ class WebCommunitySimulator:
                 n_states,
                 p=transition_matrix[current_state],
             )
-            observations.append(
-                observation_words[current_state % n_obs_words]
+            obs_idx = np.random.choice(
+                emission_matrix.shape[1], 
+                p=emission_matrix[current_state]
             )
+            pair = observation_pairs[obs_idx]
+            observations.append(f"{pair[0]}-{pair[1]}")
             positions.append(current_state / max(n_states - 1, 1))
 
         return observations, positions

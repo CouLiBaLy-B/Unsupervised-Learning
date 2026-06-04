@@ -157,10 +157,11 @@ class MultiLayerPerceptron:
     """
 
     def __init__(self, n_input: int, n_hidden: int, n_output: int) -> None:
-        # Initialize weights with small random values
-        self.W1 = np.random.randn(n_input, n_hidden) * 0.01
+        # He initialization for ReLU: std = sqrt(2/n_in)
+        self.W1 = np.random.randn(n_input, n_hidden) * np.sqrt(2.0 / n_input)
         self.b1 = np.zeros((1, n_hidden))
-        self.W2 = np.random.randn(n_hidden, n_output) * 0.01
+        # Xavier/Glorot initialization for Sigmoid: std = sqrt(1/n_in)
+        self.W2 = np.random.randn(n_hidden, n_output) * np.sqrt(1.0 / n_hidden)
         self.b2 = np.zeros((1, n_output))
 
         # Momentum terms
@@ -293,9 +294,11 @@ def train_mlp(
         # Backward pass
         model.backward(X_train, y_train)
 
-        # Update parameters
-        model.update_simple(learning_rate)
-        model.update_momentum(learning_rate, beta)
+        # Update parameters - use momentum if beta is provided, else simple GD
+        if beta > 0:
+            model.update_momentum(learning_rate, beta)
+        else:
+            model.update_simple(learning_rate)
 
         # Test metrics
         y_test_pred = model.forward(X_test)
