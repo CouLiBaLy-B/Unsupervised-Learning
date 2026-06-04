@@ -29,7 +29,7 @@ st.write("""Simulation d'un graphe orienté de N sommets et de probabilité p.
 st.sidebar.header("Paramètres")
 num_nodes = st.sidebar.slider("Nombre de sommets", 7, 10, 8)
 edge_prob = st.sidebar.slider("Probabilité p", 0.4, 1.0, 0.5)
-epsilon = st.sidebar.slider("Epsilon ϵ (lissage)", 0.0, 0.50, 0.05)
+alpha = st.sidebar.slider("Facteur d'amortissement α", 0.0, 1.0, 0.85)
 power_iter = st.sidebar.number_input(
     "Puissance n de la matrice de transition",
     min_value=10,
@@ -77,7 +77,7 @@ st.write("""Une fois le graphe généré, nous pouvons facilement obtenir la mat
     de transition avec lissage ϵ.""")
 
 simulator.compute_adjacency_matrix()
-transition_matrix = simulator.compute_transition_matrix(epsilon)
+transition_matrix = simulator.compute_transition_matrix(alpha)
 st.dataframe(transition_matrix)
 
 # ---- Stationary Probability ----
@@ -91,7 +91,7 @@ st.write(
 
 stationary_prob = simulator.compute_stationary_probability(
     power=power_iter,
-    epsilon=epsilon,
+    alpha=alpha,
 )
 st.dataframe(stationary_prob)
 

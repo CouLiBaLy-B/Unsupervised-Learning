@@ -34,11 +34,9 @@ st.markdown(
 
 def main() -> None:
     """Run the HMM web communication simulation app."""
-    st.write(
-        """Dans cette section, nous simulons un parcours web à l'aide d'une chaîne
+    st.write("""Dans cette section, nous simulons un parcours web à l'aide d'une chaîne
         de Markov cachée (HMM) dont les paramètres sont les états cachés (domaines)
-        et les observations (mots clés)."""
-    )
+        et les observations (mots clés).""")
 
     # ---- Sidebar Parameters ----
     st.sidebar.header("Paramètres HMM")
@@ -90,14 +88,12 @@ def main() -> None:
 
     # ---- Joint Emission Matrix ----
     st.subheader("Matrice de probabilité jointe D")
-    st.write(
-        """Pour la simulation à double mots clés, nous déterminons la matrice
+    st.write("""Pour la simulation à double mots clés, nous déterminons la matrice
         des probabilités pour des couples de mots clés, sous condition d'indépendance
         des deux mots clés par rapport au domaine :
 
         $D_{i,j} = P(X_j = W1, Y_j = W2 | Dom_i) = P(X_j = W1 | Dom_i) \\times P(Y_j = W2 | Dom_i)$
-        """
-    )
+        """)
 
     keyword_pairs = markov_model.observation_pairs
     joint_matrix = markov_model.joint_emission_matrix
@@ -173,11 +169,9 @@ def main() -> None:
 
         # ---- Viterbi Decoding ----
         st.subheader("Générateur des états cachés avec Viterbi")
-        st.write(
-            """L'algorithme de Viterbi est une solution optimale au sens du maximum
+        st.write("""L'algorithme de Viterbi est une solution optimale au sens du maximum
             de vraisemblance pour l'estimation d'une séquence d'états d'un processus
-            de Markov à temps discret et nombre d'états finis."""
-        )
+            de Markov à temps discret et nombre d'états finis.""")
 
         with st.spinner("Viterbi en cours..."):
             decoded = Viterbi.decode(

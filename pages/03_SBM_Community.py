@@ -29,8 +29,7 @@ st.markdown(
 
 def main() -> None:
     """Run the SBM community simulation app."""
-    st.write(
-        """Supposons qu'un ensemble de pages web soit partagé en groupes selon un
+    st.write("""Supposons qu'un ensemble de pages web soit partagé en groupes selon un
         processus stochastique :
 
         - Les pages traitant de sport (z = S)
@@ -39,8 +38,7 @@ def main() -> None:
 
         Avec $X_{ij} | z_i=k, z_j=l \\sim B(\\alpha I_{(k=l)} + \\beta I_{(k \\neq l)})$
         et $P(z_i = k) = \\pi_k = 1/3$.
-        """
-    )
+        """)
 
     # ---- Sidebar Parameters ----
     st.sidebar.header("Paramètres SBM")
@@ -51,7 +49,11 @@ def main() -> None:
         value=DEFAULT_SBM_SIZE,
     )
     alpha = st.sidebar.slider(
-        "Alpha (intra-communauté)", 0.01, 0.50, DEFAULT_SBM_ALPHA, key="alpha_sbm_slider"
+        "Alpha (intra-communauté)",
+        0.01,
+        0.50,
+        DEFAULT_SBM_ALPHA,
+        key="alpha_sbm_slider",
     )
     beta = st.sidebar.slider(
         "Beta (inter-communauté)", 0.01, 0.50, DEFAULT_SBM_BETA, key="beta_sbm_slider"
@@ -125,12 +127,14 @@ def main() -> None:
             st.subheader("Simulations de marche aléatoire")
             walk_A1, pos_A1 = simulator.simulate_random_walk(
                 transition_matrix=A1,
-                observation_words=observations,
+                emission_matrix=markov_model.joint_emission_matrix,
+                observation_pairs=markov_model.observation_pairs,
                 n_steps=walk_steps,
             )
             walk_A2, pos_A2 = simulator.simulate_random_walk(
                 transition_matrix=A2,
-                observation_words=observations,
+                emission_matrix=markov_model.joint_emission_matrix,
+                observation_pairs=markov_model.observation_pairs,
                 n_steps=walk_steps,
             )
 

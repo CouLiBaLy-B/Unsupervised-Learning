@@ -28,15 +28,13 @@ st.markdown(
 
 def main() -> None:
     """Run the MLP classifier training app."""
-    st.write(
-        """Utiliser un modèle de classification basé sur du deep learning.
+    st.write("""Utiliser un modèle de classification basé sur du deep learning.
 
         Le principe est le suivant :
         - Découper la chaîne en batch de petite taille (segments de longueur définie)
         - À chaque batch on associe un label (0 ou 1) en fonction de la chaîne de provenance
         - Entraîner un modèle Perceptron Multicouche (MLP) avec descente de gradient et momentum
-        """
-    )
+        """)
 
     # ---- Sidebar Parameters ----
     st.sidebar.header("Paramètres MLP")
@@ -118,9 +116,7 @@ def main() -> None:
                 for epoch in range(n_epochs):
                     # Forward
                     y_train_pred = mlp.forward(X_train)
-                    train_cost.append(
-                        binary_cross_entropy(y_train_pred, y_train)
-                    )
+                    train_cost.append(binary_cross_entropy(y_train_pred, y_train))
                     train_acc.append(accuracy(y_train_pred, y_train))
 
                     # Backward

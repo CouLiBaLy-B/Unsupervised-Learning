@@ -73,9 +73,7 @@ class MarkovModel:
             for j in range(i, n_obs):
                 if i != j:
                     joint_matrix[:, pair_index] = (
-                        2.0
-                        * self.emission_matrix[:, i]
-                        * self.emission_matrix[:, j]
+                        2.0 * self.emission_matrix[:, i] * self.emission_matrix[:, j]
                     )
                 else:
                     joint_matrix[:, pair_index] = (
@@ -210,13 +208,17 @@ class BaumWelch:
         c = np.zeros(T)
 
         # Initialization
-        alpha[0] = self.initial_distribution * self.emission_matrix[:, self.observations[0]]
+        alpha[0] = (
+            self.initial_distribution * self.emission_matrix[:, self.observations[0]]
+        )
         c[0] = 1.0 / (np.sum(alpha[0]) + 1e-15)
         alpha[0] *= c[0]
 
         # Induction
         for t in range(1, T):
-            alpha[t] = (alpha[t - 1] @ self.transition_matrix) * self.emission_matrix[:, self.observations[t]]
+            alpha[t] = (alpha[t - 1] @ self.transition_matrix) * self.emission_matrix[
+                :, self.observations[t]
+            ]
             c[t] = 1.0 / (np.sum(alpha[t]) + 1e-15)
             alpha[t] *= c[t]
 
@@ -240,7 +242,10 @@ class BaumWelch:
 
         # Induction (backward in time)
         for t in range(T - 2, -1, -1):
-            beta[t] = (self.transition_matrix @ (self.emission_matrix[:, self.observations[t + 1]] * beta[t + 1])) * c[t]
+            beta[t] = (
+                self.transition_matrix
+                @ (self.emission_matrix[:, self.observations[t + 1]] * beta[t + 1])
+            ) * c[t]
 
         return beta
 
@@ -261,25 +266,29 @@ class BaumWelch:
             # Vectorized computation of xi (joint state probabilities)
             # xi shape: (T-1, M, M)
             # xi[t, i, j] = alpha[t, i] * A[i, j] * B[j, o_{t+1}] * beta[t+1, j]
-            
+
             xi = np.zeros((T - 1, M, M))
             for t in range(T - 1):
-                num = (alpha[t][:, None] * self.transition_matrix * 
-                       self.emission_matrix[:, self.observations[t+1]] * beta[t+1])
+                num = (
+                    alpha[t][:, None]
+                    * self.transition_matrix
+                    * self.emission_matrix[:, self.observations[t + 1]]
+                    * beta[t + 1]
+                )
                 xi[t] = num / (np.sum(num) + 1e-15)
 
             # Compute gamma (marginal state probabilities)
             # gamma shape: (T, M)
             gamma = np.zeros((T, M))
-            gamma[:T-1] = np.sum(xi, axis=2)
+            gamma[: T - 1] = np.sum(xi, axis=2)
             # Last gamma: gamma[T-1, i] = alpha[T-1, i] / sum(alpha[T-1])
             # Since alpha is already scaled, we just normalize it.
-            gamma[T-1] = alpha[T-1] / (np.sum(alpha[T-1]) + 1e-15)
+            gamma[T - 1] = alpha[T - 1] / (np.sum(alpha[T - 1]) + 1e-15)
 
             # Update transition matrix A
             # A[i, j] = sum_t(xi[t, i, j]) / sum_t(gamma[t, i])
             num_a = np.sum(xi, axis=0)
-            den_a = np.sum(gamma[:T-1], axis=0)[:, None]
+            den_a = np.sum(gamma[: T - 1], axis=0)[:, None]
             self.transition_matrix = np.around(num_a / (den_a + 1e-15), 4)
 
             # Update emission matrix B
@@ -287,7 +296,7 @@ class BaumWelch:
             num_b = np.zeros((M, K))
             for k in range(K):
                 num_b[:, k] = np.sum(gamma[self.observations == k], axis=0)
-            
+
             den_b = np.sum(gamma, axis=0)[:, None]
             self.emission_matrix = np.around(num_b / (den_b + 1e-15), 4)
 
@@ -490,11 +499,10 @@ class WebCommunitySimulator:
 
         # Sample first observation based on current state
         obs_idx = np.random.choice(
-            emission_matrix.shape[1], 
-            p=emission_matrix[current_state]
+            emission_matrix.shape[1], p=emission_matrix[current_state]
         )
         pair = observation_pairs[obs_idx]
-        
+
         observations = [f"{pair[0]}-{pair[1]}"]
         positions = [current_state / max(n_states - 1, 1)]
 
@@ -504,8 +512,7 @@ class WebCommunitySimulator:
                 p=transition_matrix[current_state],
             )
             obs_idx = np.random.choice(
-                emission_matrix.shape[1], 
-                p=emission_matrix[current_state]
+                emission_matrix.shape[1], p=emission_matrix[current_state]
             )
             pair = observation_pairs[obs_idx]
             observations.append(f"{pair[0]}-{pair[1]}")

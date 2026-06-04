@@ -106,7 +106,7 @@ class PageRankSimulator:
         # Google Matrix M = alpha * P + (1 - alpha) * (1/n * ones_matrix)
         ones_matrix = np.ones((n, n)) / n
         self.transition_matrix = alpha * P + (1 - alpha) * ones_matrix
-        
+
         return self.transition_matrix
 
     def compute_stationary_probability(
