@@ -151,11 +151,13 @@ class PageRankSimulator:
             )
 
         networks = self.social_networks[: self.num_nodes]
+        # Pre-build index map to avoid O(n) list.index() on every step
+        name_to_idx = {name: idx for idx, name in enumerate(networks)}
         current_state = np.random.choice(networks)
         chain = [current_state]
 
         for _ in range(length):
-            current_idx = networks.index(current_state)
+            current_idx = name_to_idx[current_state]
             current_state = np.random.choice(
                 networks,
                 p=self.transition_matrix[current_idx],

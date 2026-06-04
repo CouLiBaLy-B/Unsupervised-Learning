@@ -1,6 +1,7 @@
 """Streamlit page - Classifier (MLP) Training."""
 
 import matplotlib.pyplot as plt
+import numpy as np
 import streamlit as st
 
 from src.ml.classifier import (
@@ -11,7 +12,12 @@ from src.ml.classifier import (
     split_into_batches,
     standardize,
 )
-from src.models.markov import WebCommunitySimulator
+from src.models.markov import MarkovModel, WebCommunitySimulator
+from src.utils.config import (
+    DEFAULT_DOMAINS,
+    DEFAULT_EMISSION_MATRIX,
+    DEFAULT_KEYWORDS,
+)
 
 st.set_page_config(
     page_title="Classifier - Unsupervised Learning",
@@ -76,14 +82,39 @@ def main() -> None:
             sbm.simulate()
             A1, A2 = sbm.compute_transition_matrices(1000)
 
-            # Generate simple label arrays for ML training
-            walk1_labels = [0] * (n_nodes_sbm * 5)
-            walk2_labels = [1] * (n_nodes_sbm * 5)
+            # Build emission model for observations during walks
+            markov_model = MarkovModel(
+                states=DEFAULT_DOMAINS,
+                observations=DEFAULT_KEYWORDS,
+                transition_matrix=np.array(
+                    [[0.7, 0.2, 0.1], [0.25, 0.7, 0.05], [0.1, 0.1, 0.8]]
+                ),
+                emission_matrix=np.array(DEFAULT_EMISSION_MATRIX),
+            )
+
+            # Generate real random walks on A1 and A2 and encode node positions
+            n_walk_steps = n_nodes_sbm * 5
+            _, walk1_positions = sbm.simulate_random_walk(
+                transition_matrix=A1,
+                emission_matrix=markov_model.joint_emission_matrix,
+                observation_pairs=markov_model.observation_pairs,
+                n_steps=n_walk_steps,
+            )
+            _, walk2_positions = sbm.simulate_random_walk(
+                transition_matrix=A2,
+                emission_matrix=markov_model.joint_emission_matrix,
+                observation_pairs=markov_model.observation_pairs,
+                n_steps=n_walk_steps,
+            )
+
+        # Encode walks as node-position sequences for ML
+        walk1_encoded = [int(p * (n_nodes_sbm - 1)) for p in walk1_positions]
+        walk2_encoded = [int(p * (n_nodes_sbm - 1)) for p in walk2_positions]
 
         # Encode walks as integers for ML
         X_encoded, y_encoded = split_into_batches(
-            sequence_1=walk1_labels,
-            sequence_2=walk2_labels,
+            sequence_1=walk1_encoded,
+            sequence_2=walk2_encoded,
             batch_size=batch_size,
         )
 
@@ -122,9 +153,11 @@ def main() -> None:
                     # Backward
                     mlp.backward(X_train, y_train)
 
-                    # Update
-                    mlp.update_simple(learning_rate)
-                    mlp.update_momentum(learning_rate, momentum_beta)
+                    # Update — use momentum if beta > 0, else simple gradient descent
+                    if momentum_beta > 0:
+                        mlp.update_momentum(learning_rate, momentum_beta)
+                    else:
+                        mlp.update_simple(learning_rate)
 
                     # Test metrics
                     y_test_pred = mlp.forward(X_test)
