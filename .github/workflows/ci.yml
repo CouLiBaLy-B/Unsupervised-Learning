@@ -76,6 +76,6 @@ jobs:
 
       - name: Verify Streamlit app starts
         run: |
-          timeout 30s streamlit run src/home.py --server.headless true --server.port 8501 &
+          timeout 30s streamlit run home.py --server.headless true --server.port 8501 &
           sleep 10
           curl -s -o /dev/null -w "%{http_code}" http://localhost:8501 || echo "Streamlit app started"
